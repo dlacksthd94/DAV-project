@@ -1,0 +1,14 @@
+# demo
+demo.html
+
+# code
+extract_animal_name.py
+make_animal_list_from_wiki.py
+ner.py
+
+# file
+id_animal.csv
+id_title_content_animal.csv
+id_title_content.csv
+list_animal.pickle
+list_animal.txt
