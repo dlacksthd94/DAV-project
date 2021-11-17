@@ -3,6 +3,7 @@ import re
 import json
 import pandas as pd
 import nltk
+from tqdm import tqdm
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -112,15 +113,19 @@ df_cnt_pair_join
 
 # episode version
 set_node = set(chain.from_iterable(df_cnt_epi_pair['pair'].to_list()))
-df_node = pd.DataFrame(set_node, columns=['name', 'pos'])
-df_edge = df_cnt_epi_pair['pair'].apply(lambda pair: ' '.join([pair[0][0], pair[1][0]])).str.split(expand=True)
+df_node = pd.DataFrame(set_node, columns=['name', 'group'])
+tqdm.pandas()
+sr_edge = df_cnt_epi_pair['pair'].progress_apply(lambda pair: (df_node[(df_node['name'] == pair[0][0]) & (df_node['group'] == pair[0][1])].index[0], df_node[(df_node['name'] == pair[1][0]) & (df_node['group'] == pair[1][1])].index[0]))
+# df_edge = df_cnt_epi_pair['pair'].apply(lambda pair: ' '.join([pair[0][0], pair[1][0]])).str.split(expand=True)
+df_edge = pd.DataFrame(sr_edge.to_list())
 df_edge.insert(2, 'count', df_cnt_epi_pair['epi_count'])
-df_edge.columns = ['from', 'to', 'count']
+df_edge.columns = ['source', 'target', 'weight']
+
 
 file_name = 'graph_epi.json'
 file_path = os.path.join(FOLDER, file_name)
 with open(file_path, 'w') as f:
-    json_graph = json.dumps({'nodes': df_node.to_dict(orient='records'), 'edges': df_edge.to_dict(orient='records')})
+    json_graph = json.dumps({'nodes': df_node.to_dict(orient='records'), 'links': df_edge.to_dict(orient='records')})
     json.dump(json_graph, f)
 
 # sentence version
