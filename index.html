@@ -34,22 +34,19 @@ var force = d3.layout.force()
     .distance(100)
     .charge(-100)
     .size([width, height]);
-
-d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graph_epi.json", function(json) {
-  console.log(json.edges);
+console.log(force);
+d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/graph_epi.json", function(json) {
+  console.log(json.links);
   force
       .nodes(json.nodes)
-      .links(json.edges)
-      // .links(json.links)
+      .links(json.links)
       .start();
 
   var link = svg.selectAll(".link")
       .data(json.links)
-      // .data(json.edges)
     .enter().append("line")
       .attr("class", "link")
     .style("stroke-width", function(d) { return Math.sqrt(d.count); });
-    // weight -> count
 
   var node = svg.selectAll(".node")
       .data(json.nodes)
