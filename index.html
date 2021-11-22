@@ -35,14 +35,9 @@ var force = d3.layout.force()
     .charge(-100)
     .size([width, height]);
 console.log(force);
-<<<<<<< HEAD
-d3.json("data/graph_epi.json", function(json) {
-  console.log(json);
-=======
 d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graph_epi.json", function(json) {
   // console.log(json.links);
   
->>>>>>> a51bd5b72717da9220f3440d2f80f8b62928afcd
   force
       .nodes(json.nodes)
       .links(json.links)
