@@ -35,8 +35,14 @@ var force = d3.layout.force()
     .charge(-100)
     .size([width, height]);
 console.log(force);
+<<<<<<< HEAD
 d3.json("data/graph_epi.json", function(json) {
   console.log(json);
+=======
+d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graph_epi.json", function(json) {
+  // console.log(json.links);
+  
+>>>>>>> a51bd5b72717da9220f3440d2f80f8b62928afcd
   force
       .nodes(json.nodes)
       .links(json.links)
@@ -46,7 +52,7 @@ d3.json("data/graph_epi.json", function(json) {
       .data(json.links)
     .enter().append("line")
       .attr("class", "link")
-    .style("stroke-width", function(d) { return Math.sqrt(d.count); });
+    .style("stroke-width", function(d) { return Math.sqrt(d.weight); });
 
   var node = svg.selectAll(".node")
       .data(json.nodes)
@@ -63,11 +69,10 @@ d3.json("data/graph_epi.json", function(json) {
       .text(function(d) { return d.name });
 
   force.on("tick", function() {
-    // source -> from, target -> to
-    link.attr("x1", function(d) { return d.from.x; })
-        .attr("y1", function(d) { return d.from.y; })
-        .attr("x2", function(d) { return d.to.x; })
-        .attr("y2", function(d) { return d.to.y; });
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
