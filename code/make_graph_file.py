@@ -121,6 +121,19 @@ df_edge = pd.DataFrame(sr_edge.to_list())
 df_edge.insert(2, 'count', df_cnt_epi_pair['epi_count'])
 df_edge.columns = ['source', 'target', 'weight']
 
+# trim out 1~2 edges
+df_edge = df_edge[~df_edge['weight'].isin([1,2])]
+set_edge = set(df_edge['source'].unique()).union(df_edge['target'].unique())
+df_node = df_node[df_node.index.isin(set_edge)]
+df_node = df_node.reset_index()
+dict_change_idx = dict(map(lambda x: (x[1], x[0]), df_node['index'].to_dict().items()))
+df_edge['source'] = df_edge['source'].apply(lambda x: dict_change_idx[x])
+df_edge['target'] = df_edge['target'].apply(lambda x: dict_change_idx[x])
+df_node = df_node.drop('index', axis=1)
+df_edge = df_edge.reset_index(drop=True)
+
+df_node
+df_edge
 
 file_name = 'graph_epi.json'
 file_path = os.path.join(FOLDER, file_name)
@@ -128,15 +141,17 @@ with open(file_path, 'w') as f:
     json_graph = json.dumps({'nodes': df_node.to_dict(orient='records'), 'links': df_edge.to_dict(orient='records')})
     json.dump(json_graph, f)
 
-# sentence version
-set_node = set(chain.from_iterable(df_cnt_sent_pair['pair'].to_list()))
-df_node = pd.DataFrame(set_node, columns=['name', 'pos'])
-df_edge = df_cnt_sent_pair['pair'].apply(lambda pair: ' '.join([pair[0][0], pair[1][0]])).str.split(expand=True)
-df_edge.insert(2, 'count', df_cnt_sent_pair['sent_count'])
-df_edge.columns = ['from', 'to', 'count']
 
-file_name = 'graph_sent.json'
-file_path = os.path.join(FOLDER, file_name)
-with open(file_path, 'w') as f:
-    json_graph = json.dumps({'nodes': df_node.to_dict(orient='records'), 'edges': df_edge.to_dict(orient='records')})
-    json.dump(json_graph, f)
+
+# # sentence version
+# set_node = set(chain.from_iterable(df_cnt_sent_pair['pair'].to_list()))
+# df_node = pd.DataFrame(set_node, columns=['name', 'pos'])
+# df_edge = df_cnt_sent_pair['pair'].apply(lambda pair: ' '.join([pair[0][0], pair[1][0]])).str.split(expand=True)
+# df_edge.insert(2, 'count', df_cnt_sent_pair['sent_count'])
+# df_edge.columns = ['from', 'to', 'count']
+
+# file_name = 'graph_sent.json'
+# file_path = os.path.join(FOLDER, file_name)
+# with open(file_path, 'w') as f:
+#     json_graph = json.dumps({'nodes': df_node.to_dict(orient='records'), 'edges': df_edge.to_dict(orient='records')})
+#     json.dump(json_graph, f)

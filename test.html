@@ -36,6 +36,7 @@ var force = d3.layout.force()
     .size([width, height]);
 
 d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/graphFile.json", function(json) {
+  console.log(json);
   force
       .nodes(json.nodes)
       .links(json.links)
