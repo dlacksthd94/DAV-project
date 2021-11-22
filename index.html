@@ -9,7 +9,7 @@
 
 .node text {
 stroke:#333;
-cursos:pointer;
+cursor:pointer;
 }
 
 .node circle{
@@ -35,7 +35,7 @@ var force = d3.layout.force()
     .charge(-100)
     .size([width, height]);
 console.log(force);
-d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graph_epi.json", function(json) {
+d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graphFile_copy.json", function(json) {
   // console.log(json.links);
   force
       .nodes(json.nodes)
