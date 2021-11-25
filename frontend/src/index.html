@@ -22,8 +22,8 @@ fill:#555;
 <body>
 <script>
 
-var width = 960,
-    height = 500
+var width = 1440,
+    height = 750
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
@@ -31,12 +31,12 @@ var svg = d3.select("body").append("svg")
 
 var force = d3.layout.force()
     .gravity(.05)
-    .distance(100)
+    .distance(1000)
     .charge(-100)
     .size([width, height]);
 console.log(force);
-d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/data/graph_epi.json", function(json) {
-  // console.log(json.links);
+d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_epi.json", function(json) {
+  console.log(json);
   
   force
       .nodes(json.nodes)

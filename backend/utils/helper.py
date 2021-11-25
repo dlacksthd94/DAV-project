@@ -3,6 +3,7 @@ import numpy as np
 import re
 import os
 import nltk
+import json
 
 from math import log
 from tqdm import tqdm
@@ -66,6 +67,9 @@ def dav_text_preprocess(text:str, dict_contraction:dict = None):
     text = re.sub('[:;?!]', '.', text)
     text = re.sub('"', '', text)
     
+    # 2021-11-25 cs lim: change i to I
+    text = re.sub('(?<= )i(?= |\.)', 'I', text)
+
     return text
 
 def merge_duplicate(data:pd.DataFrame) -> pd.DataFrame:
@@ -91,8 +95,7 @@ def merge_duplicate(data:pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def dav_data_transform(input_path:str, save_path:str) -> None:
-    
+def dav_data_transform(input_path:str, save_path:str) -> None:    
     
     data = pd.read_csv(input_path)
 
@@ -121,19 +124,24 @@ def dav_data_transform(input_path:str, save_path:str) -> None:
                     token[0], pos=dict_num2pos[token[1]]
                 ), token[1]) for token in list_token] for list_token in list_sent
             ]
-        ) 
+        )
+    
+    # 2021-11-25 cs lim: manually correct some wrong-lemmatized words
+    dict_src2trg = {'saw': 'see', 'as': 'ass'}
+    data['episode'] = data['episode'].apply(lambda list_sent: [[token if token[0] not in dict_src2trg else (dict_src2trg[token[0]], token[1]) for token in list_token ] for list_token in list_sent])
+
     data_dict = {}
-    for title_id, doc in data.iterrows():
+    for idx, title_id, title, doc in data.itertuples(): # 2021-11-25 cs lim: fixed IndexError
         column = ['doc_len', 'word', 'pos', 'episode_id', 'tf']
         sub_data = []
-        for sent_id, sent in enumerate(doc[1]):
-            doc_len = len(doc[1])
+        for sent_id, sent in enumerate(doc):
+            doc_len = len(doc)
             sent_len = len(sent)
             dummy = [
                 sub_data.append([doc_len, sent[i][0], sent[i][1], sent_id+1, 1/sent_len])
                 for i in range(sent_len)
             ]
-        data_dict[doc[0]] = pd.DataFrame(sub_data, columns=column)
+        data_dict[title] = pd.DataFrame(sub_data, columns=column)
         
         data = []
 
@@ -150,8 +158,38 @@ def dav_data_transform(input_path:str, save_path:str) -> None:
             data.append([key, row[0], row[1], row[2], row[3], row[4], row[5], row[6]])
             for _, row in data_dict[key].iterrows()
         ]
-
+    
     data = pd.DataFrame(
         data, columns=['title', 'doc_len', 'word', 'pos', 'sent_id', 'tf', 'idf', 'tf_idf']
     )
+
     data.to_csv(save_path, index=False)
+
+# 2021-11-25 cs lim: make N-node graph file
+def dav_make_graph_file(input_path: str, output_path: str, N: int) -> None:
+    # open file
+    df = pd.read_csv(input_path)
+
+    # select N nodes
+    list_node_all = list(map(tuple, chain(df[['word', 'pos']].to_records(index=False))))
+    cnt_node_selected = Counter(list_node_all).most_common(N)
+    list_node_selected = list(map(lambda x: x[0], cnt_node_selected))
+    dict_idx2node = dict(enumerate(list_node_selected))
+    dict_node2idx = dict(map(lambda x: (x[1], x[0]), dict_idx2node.items()))
+    dict_idx2count = dict(map(lambda x: (dict_node2idx[x[0]], x[1]), cnt_node_selected))
+    df['pair_id'] = df[['word', 'pos']].apply(lambda pair: dict_node2idx[tuple(pair)] if tuple(pair) in list_node_selected else -1, axis=1)
+    df = df[df['pair_id'] != -1].reset_index(drop=True)
+    df['count'] = df['pair_id'].apply(lambda x: dict_idx2count[x])
+
+    # make node list
+    df_node = df[['word', 'pos', 'count']].drop_duplicates().sort_values('count', ascending=False).reset_index(drop=True)
+    df_node.columns = ['name', 'group', 'count']
+
+    # make edge list
+    list_edge_selected = list(map(lambda x: tuple(sorted(x)), chain.from_iterable(df.groupby('title').apply(lambda x: list(combinations(set(x['pair_id']), 2))))))
+    cnt_edge_selected = Counter(list_edge_selected)
+    df_edge = pd.DataFrame(map(lambda x: x[0] + (x[1],), cnt_edge_selected.items()), columns=['source', 'target', 'weight'])
+
+    with open(output_path, 'w') as f:
+        json_graph = {'nodes': df_node.to_dict(orient='records'), 'links': df_edge.to_dict(orient='records')}
+        json.dump(json_graph, f, indent=4)
