@@ -1,12 +1,15 @@
 # demo
 demo.html
 
+# folder
+/stanford-corenlp-4.3.2
+
 # code
 extract_animal_name.py
 make_animal_list_from_wiki.py
 ner.py
 
-# file
+# data
 id_animal.csv
 id_title_content_animal.csv
 id_title_content.csv
