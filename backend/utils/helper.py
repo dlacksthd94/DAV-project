@@ -1,3 +1,7 @@
+from matplotlib import axes
+from nltk.util import filestring
+from numpy.core.defchararray import index
+from numpy.matrixlib.defmatrix import asmatrix
 import pandas as pd
 import numpy as np
 import re
@@ -8,6 +12,7 @@ import json
 from math import log
 from tqdm import tqdm
 from nltk import pos_tag
+from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
@@ -18,6 +23,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 list_all = ['NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ', 'JJ', 'JJR', 'JJS']
 dict_pos2num = {'n': 1, 'v': 2, 'j': 3}
 dict_num2pos = {1: 'n', 2: 'v', 3: 'a'}
+nltk.download('stopwords')
+list_stopword = stopwords.words('english')
+    
 
 def dav_text_preprocess(text:str, dict_contraction:dict = None):
     if dict_contraction == None:
@@ -52,7 +60,7 @@ def dav_text_preprocess(text:str, dict_contraction:dict = None):
             "you'd": "you would", "you'd've": "you would have", "you'll": "you will", "you'll've": "you will have", 
             "you're": "you are", "you've": "you have"
         }
-        
+
     # 2021-11-18 jh park: first change npcs to a spacing, and then change spacings to a spacing.
     text = re.sub('\s', ' ', text)
     text = re.sub(' +', ' ', text)
@@ -116,19 +124,22 @@ def dav_data_transform(input_path:str, save_path:str) -> None:
                 for list_token in list_sent
             ]
         )
-
     data['episode'] = data['episode'].apply(
-        lambda list_sent: [
-            [
-                (WordNetLemmatizer().lemmatize(
-                    token[0], pos=dict_num2pos[token[1]]
-                ), token[1]) for token in list_token] for list_token in list_sent
+            lambda list_sent: [
+                [
+                    (WordNetLemmatizer().lemmatize(
+                        token[0], pos=dict_num2pos[token[1]]
+                    ), token[1]) for token in list_token
+                ] for list_token in list_sent
             ]
         )
-    
+    # 2021-11-26 cs lim: remove stopword
+    data['episode'] = data['episode'].apply(lambda list_sent: [list(filter(lambda token: token[0] not in list_stopword, list_token)) for list_token in list_sent])
+
     # 2021-11-25 cs lim: manually correct some wrong-lemmatized words
-    dict_src2trg = {'saw': 'see', 'as': 'ass'}
+    dict_src2trg = {'saw': 'see', 'as': 'ass', 'fell': 'fall'}
     data['episode'] = data['episode'].apply(lambda list_sent: [[token if token[0] not in dict_src2trg else (dict_src2trg[token[0]], token[1]) for token in list_token ] for list_token in list_sent])
+    data['episode'] = data['episode'].apply(lambda list_sent: [[('fell', 2) if token1[0] == 'fall' and token2[0] == 'tree' else token1 for token1, token2 in zip(list_token, list_token[1:] + [('EOS', 1)])] for list_token in list_sent])
 
     data_dict = {}
     for idx, title_id, title, doc in data.itertuples(): # 2021-11-25 cs lim: fixed IndexError
@@ -166,30 +177,34 @@ def dav_data_transform(input_path:str, save_path:str) -> None:
     data.to_csv(save_path, index=False)
 
 # 2021-11-25 cs lim: make N-node graph file
-def dav_make_graph_file(input_path: str, output_path: str, N: int) -> None:
+# 2021-11-26 cs lim: edit function
+def dav_make_graph_file(input_path: str, output_path: str, NUM_NODE: int, WEIGHT_THRES: int, BY: str) -> None:
     # open file
     df = pd.read_csv(input_path)
 
-    # select N nodes
+    # all nodes
     list_node_all = list(map(tuple, chain(df[['word', 'pos']].to_records(index=False))))
-    cnt_node_selected = Counter(list_node_all).most_common(N)
-    list_node_selected = list(map(lambda x: x[0], cnt_node_selected))
-    dict_idx2node = dict(enumerate(list_node_selected))
-    dict_node2idx = dict(map(lambda x: (x[1], x[0]), dict_idx2node.items()))
-    dict_idx2count = dict(map(lambda x: (dict_node2idx[x[0]], x[1]), cnt_node_selected))
-    df['pair_id'] = df[['word', 'pos']].apply(lambda pair: dict_node2idx[tuple(pair)] if tuple(pair) in list_node_selected else -1, axis=1)
-    df = df[df['pair_id'] != -1].reset_index(drop=True)
-    df['count'] = df['pair_id'].apply(lambda x: dict_idx2count[x])
-
-    # make node list
-    df_node = df[['word', 'pos', 'count']].drop_duplicates().sort_values('count', ascending=False).reset_index(drop=True)
-    df_node.columns = ['name', 'group', 'count']
-
-    # make edge list
-    list_edge_selected = list(map(lambda x: tuple(sorted(x)), chain.from_iterable(df.groupby('title').apply(lambda x: list(combinations(set(x['pair_id']), 2))))))
+    cnt_node_all = Counter(list_node_all)
+    df_node_all = pd.DataFrame(map(lambda x: x[0] + (x[1],), cnt_node_all.items()), columns=['word', 'pos', 'count'])
+    
+    # select N nodes
+    df_node_selected = df_node_all.sort_values('count', ascending=False)[:NUM_NODE].reset_index(drop=True)
+    df_node_selected.columns = ['name', 'group', 'count']
+    
+    # node list
+    list_node_selected = df_node_selected[['name', 'group']].to_records(index=False).tolist()
+    
+    # edge list
+    df_selected = df[df[['word', 'pos']].apply(lambda x: tuple(x) in list_node_selected, axis=1)].copy(deep=True)
+    df_selected['node_id'] = df_selected.apply(lambda x: list_node_selected.index(tuple(x[['word', 'pos']])), axis=1)
+    if BY == 'epi':
+        list_edge_selected = list(map(lambda x: tuple(sorted(x)), chain.from_iterable(df_selected.groupby('title').apply(lambda x: list(combinations(set(x['node_id']), 2))))))
+    elif BY == 'sent':
+        list_edge_selected = list(map(lambda x: tuple(sorted(x)), chain.from_iterable(df_selected.groupby(['title', 'sent_id']).apply(lambda x: list(combinations(set(x['node_id']), 2))))))
     cnt_edge_selected = Counter(list_edge_selected)
-    df_edge = pd.DataFrame(map(lambda x: x[0] + (x[1],), cnt_edge_selected.items()), columns=['source', 'target', 'weight'])
+    df_edge_selected = pd.DataFrame(map(lambda x: x[0] + (x[1],), cnt_edge_selected.items()), columns=['source', 'target', 'weight'])
+    df_edge_selected = df_edge_selected[df_edge_selected['weight'] >= WEIGHT_THRES]
 
     with open(output_path, 'w') as f:
-        json_graph = {'nodes': df_node.to_dict(orient='records'), 'links': df_edge.to_dict(orient='records')}
+        json_graph = {'nodes': df_node_selected.to_dict(orient='records'), 'links': df_edge_selected.to_dict(orient='records')}
         json.dump(json_graph, f, indent=4)
