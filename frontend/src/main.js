@@ -11,11 +11,13 @@ function renderButtons(){
         };
     });
 };
+
 function addAccordion(container, num, title, episode) {
     var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>';
     container.innerHTML += html;
 }
-function renderStories() {
+
+function renderAccordion() {
     d3.csv(csv_url, function (csv) {
         titles = [...new Set(csv.map(d => d.title))]
         episodes = [...new Set(csv.map(d => d.episode))]
@@ -29,20 +31,39 @@ function renderStories() {
         };
     });
 };
-function getActiveButtons() {
-    var buttons = document.querySelectorAll(".btn-primary")
-    var actives = document.querySelectorAll(".btn-primary.active")
-    var all = []
-    var selected = []
-    buttons.forEach(button => all.push(button.innerHTML))
-    actives.forEach(button => selected.push(button.innerHTML))
-    console.log(selected)
-    document.getElementById('values').innerHTML = "Selected words: " + selected.join(", ").toString()
-    all.forEach(function (value) {
-        var group = document.getElementById(value)
+
+function allBtns(){
+    var buttons = document.querySelectorAll(".btn-primary");
+    var all_buttons = []
+    buttons.forEach(button => all_buttons.push(button.innerHTML));
+    return all_buttons
+}
+
+function selectedBtns(){
+    var actives = document.querySelectorAll(".btn-primary.active");
+    var selected_buttons = []
+    actives.forEach(button => selected_buttons.push(button.innerHTML));
+    return selected_buttons
+}
+
+function updateSelectedWords() {
+    document.getElementById('values').innerHTML = "Selected words: " + selectedBtns().join(", ").toString();
+};
+
+function changeNodeColor(){
+    console.log("changeNodeColor");
+    var all = allBtns()
+    var selected = selectedBtns();
+    // console.log(selected)
+    // console.log(all)
+    all.forEach(function (value){
+        // console.log(value)
+        var group = document.getElementById(value);
+        // console.log(group);
         circle = group.childNodes[0];
         text = group.childNodes[1];
         if (selected.includes(value)) {
+            
             circle.setAttribute("fill", "red");
             text.style.fill = "red";
         } else {
@@ -50,6 +71,10 @@ function getActiveButtons() {
             text.style.fill = "black";
         };
     });
+};
+function updateAccordion(){
+    var all = allBtns()
+    var selected = selectedBtns()
     d3.csv(csv_url, function (csv) {
         titles = [...new Set(csv.map(d => d.title))]
         episodes = [...new Set(csv.map(d => d.episode))]
@@ -66,6 +91,26 @@ function getActiveButtons() {
         });
     })
 };
+
+function searchAccordion() {
+    search_query = document.getElementById('search-query').value
+    // console.log(search_query)
+    items = document.querySelectorAll(".accordion-item")
+    // saved_items = []
+    items.forEach(function (d) {
+        var title = d.getElementsByClassName('accordion-button')[0].innerHTML
+        var episode = d.getElementsByClassName('accordion-body')[0].innerHTML
+        var string = (title + " " + episode).toLowerCase()
+        // console.log(string)
+        if (string.includes(search_query)) {
+            // saved_items.push(d.outerHTML)
+            d.hidden = false
+        } else {
+            d.hidden = true
+        }
+        // console.log(title)
+    });
+}
 
 function renderSVG() {
     var width = 500,
@@ -126,28 +171,13 @@ function renderSVG() {
             node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
         });
     });
-}
+};
 
-
-
-function refreshAccordion() {
-    search_query = document.getElementById('search-query').value
-    console.log(search_query)
-    items = document.querySelectorAll(".accordion-item")
-    // saved_items = []
-    items.forEach(function (d) {
-        var title = d.getElementsByClassName('accordion-button')[0].innerHTML
-        var episode = d.getElementsByClassName('accordion-body')[0].innerHTML
-        var string = (title + " " + episode).toLowerCase()
-        // console.log(string)
-        if (string.includes(search_query)) {
-            // saved_items.push(d.outerHTML)
-            d.hidden = false
-        } else {
-            d.hidden = true
-        }
-        // console.log(title)
-    });
+function update(){
+    updateSelectedWords();
+    changeNodeColor();
+    updateAccordion();
+    searchAccordion();
 }
 
 function resetWords() {
@@ -158,59 +188,36 @@ function resetWords() {
         console.log(d.className)
         d.className = d.className.replace("active", "")
     });
-    getActiveButtons()
+    update()
 };
 
 renderButtons();
+console.log('buttons rendered')
+updateSelectedWords();
+console.log('words updated')
+renderAccordion();
+console.log('accordion rendered')
 renderSVG();
-renderStories();
-getActiveButtons();
+console.log('svg rendered')
 
-$(document).ready(function () {
-    $(".btn-primary").on('click', function () {
+$(function () {
+    $(".btn-primary").on('click', function (){
         console.log("clicked");
-        getActiveButtons();
+        update()
     });
     $('#search-button').on('click', function () {
-        refreshAccordion()
+        searchAccordion()
     });
     $('#search-query').on('search', function () {
-        getActiveButtons()
+        updateAccordion();
+        searchAccordion();
     });
     $('#search-query').on('keyup', function (event) {
-        refreshAccordion()
+        searchAccordion()
     });
     $('#reset-button').on('click', function (event) {
         resetWords()
     });
 });
 
-// console.log(titles.length)
-// var container = document.getElementById("accordionGroup")
-// container.innerHTML = ""
-// console.log(selected)
-// for(var i=0;i<titles.length;i++){
-//     title = titles[i]
-//     episode = episodes[i].replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").toLowerCase();
-
-//     if(selected.length == 0 || ((selected.length != 0) & selected.every(v => episode.includes(v)) )){
-//         title = titles[i]
-//         episode = episodes[i]
-//         num = (i+1).toString()
-//         addAccordion(container=container, num=num, title=title, episode=episode)
-//     }
-// words = episode.split(" ")
-// console.log(words)
-
-// filtered = csv.filter(function(d){return d['title']==titles[i]})
-// words = filtered.map(d => d.word)
-
-// let checker = (arr, target) => target.every(v => arr.includes(v))
-// console.log(checker)
-// if(checker(words, selected)){
-//     title = titles[i]
-//     episode = episodes[i]
-//     num = (i+1).toString()
-//     addAccordion(container=container, num=num, title=title, episode=episode)
-// }
-// }
+// episode = episodes[i].replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").toLowerCase();
