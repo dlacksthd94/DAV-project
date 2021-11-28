@@ -72,38 +72,7 @@ function getActiveButtons() {
             }
         });
     });
-};
-
-        // console.log(titles.length)
-        // var container = document.getElementById("accordionGroup")
-        // container.innerHTML = ""
-        // console.log(selected)
-        // for(var i=0;i<titles.length;i++){
-        //     title = titles[i]
-        //     episode = episodes[i].replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").toLowerCase();
-
-        //     if(selected.length == 0 || ((selected.length != 0) & selected.every(v => episode.includes(v)) )){
-        //         title = titles[i]
-        //         episode = episodes[i]
-        //         num = (i+1).toString()
-        //         addAccordion(container=container, num=num, title=title, episode=episode)
-        //     }
-        // words = episode.split(" ")
-        // console.log(words)
-
-        // filtered = csv.filter(function(d){return d['title']==titles[i]})
-        // words = filtered.map(d => d.word)
-
-        // let checker = (arr, target) => target.every(v => arr.includes(v))
-        // console.log(checker)
-        // if(checker(words, selected)){
-        //     title = titles[i]
-        //     episode = episodes[i]
-        //     num = (i+1).toString()
-        //     addAccordion(container=container, num=num, title=title, episode=episode)
-        // }
-        // }
-
+}
 
 function renderSVG() {
     var width = 500,
@@ -185,12 +154,7 @@ function refreshAccordion() {
             d.hidden = true
         }
         // console.log(title)
-    })
-    // console.log(accordions)
-    // console.log(saved)
-    // var container = document.getElementById("accordionGroup")
-    // container.innerHTML = ""
-    // saved_items.forEach(element => accordionGroup.innerHTML += element)
+    });
 }
 
 function resetWords(){
@@ -229,11 +193,32 @@ $(document).ready(function () {
     });
 });
 
+// console.log(titles.length)
+// var container = document.getElementById("accordionGroup")
+// container.innerHTML = ""
+// console.log(selected)
+// for(var i=0;i<titles.length;i++){
+//     title = titles[i]
+//     episode = episodes[i].replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").toLowerCase();
 
-        // const key = event.key;
-        // if (key === "Backspace" || key == "Delete") {
-        //     // getActiveButtons();
-        //     refreshAccordion();
-        // } else {
-        //     refreshAccordion();
-        // };
+//     if(selected.length == 0 || ((selected.length != 0) & selected.every(v => episode.includes(v)) )){
+//         title = titles[i]
+//         episode = episodes[i]
+//         num = (i+1).toString()
+//         addAccordion(container=container, num=num, title=title, episode=episode)
+//     }
+// words = episode.split(" ")
+// console.log(words)
+
+// filtered = csv.filter(function(d){return d['title']==titles[i]})
+// words = filtered.map(d => d.word)
+
+// let checker = (arr, target) => target.every(v => arr.includes(v))
+// console.log(checker)
+// if(checker(words, selected)){
+//     title = titles[i]
+//     episode = episodes[i]
+//     num = (i+1).toString()
+//     addAccordion(container=container, num=num, title=title, episode=episode)
+// }
+// }
