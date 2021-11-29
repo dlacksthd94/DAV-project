@@ -56,7 +56,7 @@ function changeNodeColor() {
     var selected = selectedBtns()
     all.forEach(function (value) {
         var group = document.getElementById(value)
-        console.log(group)
+        // console.log(group)
         circle = group.childNodes[0]
         rect = group.childNodes[1]
         text = group.childNodes[2]
@@ -86,7 +86,7 @@ function changeEdgeColor(){
         if(selected.some(name => names.includes(name))){
             // console.log(edge)
             edge.setAttribute("stroke", "red")
-            console.log('--------------start-------------')
+            // console.log('--------------start-------------')
             names.forEach(function(name){
                 
                 var group = document.getElementById(name)
@@ -94,7 +94,7 @@ function changeEdgeColor(){
                 rect = group.childNodes[1]
                 text = group.childNodes[2]
                 if (!selected.includes(name)){
-                    console.log(name)
+                    // console.log(name)
                     circle.setAttribute("fill", "orange")
                     rect.style.fill = "orange"
                     i += 1
@@ -104,7 +104,7 @@ function changeEdgeColor(){
             edge.setAttribute("stroke", "black")
         }
     })
-    console.log(i)
+    // console.log(i)
     // 
     
 }
@@ -131,7 +131,8 @@ function updateAccordion() {
 function searchAccordion() {
     search_query = document.getElementById('search-query').value
     // console.log(search_query)
-    items = document.querySelectorAll(".accordion-item")
+    items = document.querySelectorAll(".accordion-item:not([hidden])")
+    console.log(items.length)
     // saved_items = []
     items.forEach(function (d) {
         var title = d.getElementsByClassName('accordion-button')[0].innerHTML
@@ -275,13 +276,24 @@ $(document).ready(function () {
     })
     $(document).on('click', '#search-button', function (){
         searchAccordion();
+        // update()
     })
     $(document).on('search', '#search-query', function (){
         updateAccordion()
         searchAccordion()
+        // update()
     })
-    $(document).on('keyup', '#search-query', function () {
-        searchAccordion()
+    $(document).on('keyup', '#search-query', function (event) {
+        var key = event.key
+        console.log(key)
+        if(key == "Backspace" || key == 'Delete'){
+            updateAccordion()
+            searchAccordion()
+        }else{
+            searchAccordion()
+        }
+        // searchAccordion()
+        // update()
     })
     
 })
