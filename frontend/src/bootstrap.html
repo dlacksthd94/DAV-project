@@ -5,8 +5,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 페이지 제목 -->
     <title>Aesop's Fables</title>
+
+    <!-- d3 스크립트 실행 -->
     <script src="https://d3js.org/d3.v2.js?2.9.3"></script>
+
+    <!-- 부트스트랩 연결 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
@@ -15,13 +21,15 @@
 <body>
 
 
-    <!-- content -->
+    <!-- 내용 부분 시작 -->
     <div class='container-fluid w-100 h-100'>
         <div class='row'>
-            <!-- navbar -->
+            <!-- 내비게이션 바 -->
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">Word Network of Aesop's Fables</a>
+                    <!-- 내비게이션 바 제목 -->
+                    <!-- 링크 추가하면 좋을 듯 href -->
+                    <a class="navbar-brand" href="#">Word Network of Aesop's Fables</a> 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +37,7 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <!-- home이라고 써져있는 항목 -->
                             <li class="nav-item">
                                 <a class="nav-link active" aria-current="page" href="./bootstrap.html">Home</a>
                             </li>
@@ -36,52 +45,72 @@
                     </div>
                 </div>
             </nav>
-            <!-- navbar end -->
+            <!-- 내비게이션 바 끝 -->
         </div>
         <div class="row d-flex flex-fill">
-            <!-- left sidebar -->
+
+            <!-- 왼쪽 화면 (너비는 전체 너비의 25%)-->
             <div id='left-sidebar' class='w-25 p-3'>
+
+                <!-- 제목 -->
                 <h4 class='text-center p-3'>Words</h4>
-                <!-- buttons -->
+
+                <!-- 리셋 버튼 -->
                 <button class="btn btn-secondary w-100" id='reset-button'>Reset</button>
+
+                <!-- 동물 이름 버튼이 들어가는 자리 -->
                 <div id='buttons' class='justify-content-between'></div>
-                <!-- buttons end -->
-            </div>
-            <!-- left sidebar end -->
 
-            <!-- network -->
+            </div>
+            <!-- 왼쪽 화면 끝 -->
+
+            <!-- 가운데 화면 (네트워크 시각화, 너비는 전체의 50%) -->
             <div id='network' class='w-50 border'>
-                <h4 class='text-center p-3'>Network</h4>
-                <!-- selected words -->
-                <h5 id="values" class="text-center p-3"></h4>
-                <!-- selected words end -->
 
-                <!-- network svg -->
+                <!-- 제목 -->
+                <h4 class='text-center p-3'>Network</h4>
+
+                <!-- 선택된 단어가 텍스트로 나타나는 부분 -->
+                <h5 id="values" class="text-center p-3"></h4>
+
+                <!-- d3로 svg를 그릴 영역 -->
                 <div id='svg' class='border-1 d-flex justify-content-center align-content-center'></div>
-                <!-- network svg ends -->
 
             </div>
-            <!-- network end -->
+            <!-- 가운데 화면 끝 -->
 
-            <!-- right sidebar-->
+            <!-- 오른쪽 화면 (우화 제목-내용, 너비는 전체의 25%) -->
             <div id='right-sidebar' class='w-25 p-3'>
+
+                <!-- 제목 -->
                 <h4 class='text-center'>Stories</h4>
+
+                <!-- 검색창 -->
                 <form class="d-flex">
                     <input class="form-control me-2" id='search-query' type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-outline-success" id='search-button' type="button">Search</button>
                 </form>
-                <div class="accordion" id="accordionGroup">
-                </div>
+
+                <!-- 제목-내용이 들어갈 부분 -->
+                <div class="accordion" id="accordionGroup"></div>
+
             </div>
-            <!-- right sidebar end -->
+            <!-- 오른쪽 화면 끝 -->
         </div>
-        <!-- content end -->
+        <!-- 화면에 나오는 내용 끝 -->
 
+        
+        <!-- 위 내용이 전부 렌더링이 되고 나면 -->
 
+        <!-- 부트스트랩 스크립트 실행 -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
             crossorigin="anonymous"></script>
+
+        <!-- jQuery 스크립트 실행(main.js에서 jQuery를 써서) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+
+        <!-- main.js 스크립트 실행 -->
         <script type="text/javascript" src="main.js"></script>
 
 </body>
