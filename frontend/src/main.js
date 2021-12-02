@@ -62,7 +62,6 @@ function updateSelectedWords(){
 
 // 노드 색깔 바꾸는 함수
 function changeNodeColor() {
-    console.log("changeNodeColor")
     var all = allBtns(); // 모든 단어 (선택 x + 선택 o)
     var selected = selectedBtns() // 버튼이 선택된 단어
 
@@ -92,18 +91,16 @@ function changeNodeColor() {
 
 // edge 색깔 바꾸는 함수
 function changeEdgeColor(){
-    // var i = 0;
     var all = allBtns(); // 모든 단어 (선택 x + 선택 o)
     var selected = selectedBtns() // 버튼이 선택된 단어
 
     // var selected_num = selected.map(v => all.indexOf(v).toString())
-    // console.log("selected_num: "+selected_num.join(", "))
 
     edges = document.querySelectorAll(".link") // 모든 edge 읽어오기(class=link)
     edges.forEach(function(edge){ // 각각의 edge에 대해서
         // 각 edge의 id는 "source-target" 형식으로 만들어짐 (아래쪽 코드 참고)
-        var names = edge.id.split("-") // edge에 연결된 node 이름 2개
-
+        var idxs = edge.id.split("-") 
+        var names = [all[idxs[0]], all[idxs[1]]] // edge에 연결된 node 이름 2개
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
             edge.setAttribute("stroke", "red") // edge 색깔을 빨간색으로 만들기
@@ -114,7 +111,7 @@ function changeEdgeColor(){
                 text = group.childNodes[2] // 이름 텍스트
                 if (!selected.includes(name)){ // 두 노드 중에서 선택되지 않은 단어는 
                     circle.setAttribute("fill", "orange") // 원을 주황색으로
-                    rect.style.fill = "orange" // 배경 사각형도 주황색으로
+                    rect.setAttribute('style', "fill: orange") // 배경 사각형도 주황색으로
                 }
             })
         // source, target 중 왼쪽 사이드바에서 선택된 노드가 없으면
@@ -193,22 +190,37 @@ function renderSVG() {
     // id=svg인 영역에다가 빈 svg 추가하기
     var svg = d3.select("#svg").append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+
+        // 1202 추가
+        .call(d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform)
+        }))
+        .append('g');
+
 
     // 그래프에서 밀집도, 노드 간 거리, 탄성(복원력) 등 설정 
-    var force = d3.layout.force()
-        .gravity(.05)
-        .distance(275)
-        .charge(-100)
-        .size([width, height]);
+    // var force = d3.layout.force()
+    //     .gravity(.05)
+    //     .distance(275)
+    //     .charge(-100)
+    //     .size([width, height]);
+
+    // 1202 추가
+    var simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().distance(200).strength(.01))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        // .force('x', d3.forceX(width / 2).strength(.1))
+        // .force('y',  d3.forceY(height / 2).strength(.1))
 
     // 그래프 그리는 부분
     d3.json(json_url, function (json) {
         // 노드와 엣지에 힘 설정
-        force
-            .nodes(json.nodes)
-            .links(json.links)
-            .start();
+        // force
+        //     .nodes(json.nodes)
+        //     .links(json.links)
+        //     .start();
 
         // 노드 그리기
         var node = svg.selectAll(".node")
@@ -216,7 +228,7 @@ function renderSVG() {
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
             .attr("class", "node") // 클래스는 node로 지정
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            .call(force.drag);
+            // .call(force.drag);
         
         // 노드에 원 추가
         node.append("circle")
@@ -238,15 +250,15 @@ function renderSVG() {
 
         // 배경 사각형 만들기
         node.insert('rect', 'text') // node의 text에다가 사각형을 추가해줌
-            .attr({ // 위치, 크기, 클래스, 색상 지정
-                'x': d => d.bbox.x,
-                'y': d => d.bbox.y,
-                'width': d => d.bbox.width,
-                'height': d => d.bbox.height,
-                'class': "bbox",
-                'fill': 'white'
-            });
-        
+        // 위치, 크기, 클래스, 색상 지정
+            .attr('fill', 'white')
+            .attr('x', d => d.bbox.x)
+            .attr('y', d => d.bbox.y)
+            .attr('width', d => d.bbox.width)
+            .attr('height', d => d.bbox.height)
+            .attr('class', 'bbox')
+            .attr('x', d => d.bbox.x)
+            
         // 엣지 그리기
         var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
             .data(json.links)
@@ -256,18 +268,41 @@ function renderSVG() {
             .style("stroke-width", function (d) { return d.weight/50}) // edge 굵기 지정
             .attr('stroke', 'black') // edge 색상 지정
             .attr('id', function(d){
-                return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
+                return d.source+"-"+d.target // edge id 지정: source-target 형식으로
             });
         
+
+        // 1202 추가한 부분
+
+        simulation
+            .nodes(json.nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(json.links);
+
+        function ticked() {
+            link
+                .attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) { return d.target.x; })
+                .attr("y2", function(d) { return d.target.y; });
+
+            node
+                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+                // .attr("cx", function(d) { return d.x; })
+                // .attr("cy", function(d) { return d.y; });
+        }
+
         // 마우스로 노드를 드래그하면 어떻게 되는지에 관련된 것 같은데 잘 모르겠음
         // tick이라는 이벤트가 발생하면 실행되는 함수인 듯
-        force.on("tick", function () {
-            link.attr("x1", function (d) { return d.source.x; })
-                .attr("y1", function (d) { return d.source.y; })
-                .attr("x2", function (d) { return d.target.x; })
-                .attr("y2", function (d) { return d.target.y; });
-            node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
-        });
+        // force.on("tick", function () {
+        //     link.attr("x1", function (d) { return d.source.x; })
+        //         .attr("y1", function (d) { return d.source.y; })
+        //         .attr("x2", function (d) { return d.target.x; })
+        //         .attr("y2", function (d) { return d.target.y; });
+        //     node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+        // });
 
         // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
         d3.selection.prototype.moveToFront = function() {
@@ -276,9 +311,26 @@ function renderSVG() {
             });
         };
         // 각 노드를 화면 맨 위로 올려줌 (엣지 뒤에 가려지지 않게)
-        d3.selectAll('g').moveToFront();
+        d3.selectAll('.node').moveToFront();
     });
 };
+
+function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+
+function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+}
+
+function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
 
 // 화면 전체를 업데이트하는 함수
 function update() {
@@ -309,7 +361,6 @@ $(document).ready(function () {
 
     // $(".btn-primary").on('click') does not work
     $(document).on('click', ".btn-outline-primary", function () { // 만약 단어 버튼이 클릭되면
-        console.log("clicked")
         update(); // 가운데 화면에 선택된 단어도 띄워주고, 노드/엣지 색깔도 바꿔주고, 오른쪽 제목-내용도 업데이트
     })
     $(document).on('click', '#reset-button', function () { // 만약 리셋 버튼이 클릭되면
@@ -324,7 +375,6 @@ $(document).ready(function () {
     })
     $(document).on('keyup', '#search-query', function (event) { // 검색어 타이핑을 하는 와중에(키를 눌렀다가 뗄 때)
         var key = event.key // 무슨 키를 눌렀는지 확인해서
-        // console.log(key)
 
         // 검색어를 지우면 화면에 없던 것을 새로 띄워줘야 하니까 경우의 수를 나눔
         if(key == "Backspace" || key == 'Delete'){ // 만약 백스페이스나 딜리트면
