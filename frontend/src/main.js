@@ -9,7 +9,7 @@ function renderButtons() {
         var container = document.getElementById('buttons') // bootstrap.html에서 버튼을 띄울 영역 지정(id=buttons)
         for (var i = 0; i < json.nodes.length; i++){ // 모든 node에 대해서
             var obj = json.nodes[i] // 노드 선택해서
-            var html = '<button type="button" class="btn btn-primary m-1" data-bs-toggle="button" autocomplete="off">' + obj.name + '</button>' // 노드 이름을 넣은 버튼 html을 만들어서
+            var html = '<button type="button" class="btn btn-outline-primary m-1" data-bs-toggle="button" autocomplete="off">' + obj.name + '</button>' // 노드 이름을 넣은 버튼 html을 만들어서
             container.innerHTML += html // 위에서 만든 html을 buttons 컨테이너 안에 추가
         }
     })
@@ -39,7 +39,7 @@ function renderAccordion(){
 
 // html에 있는 모든 버튼의 이름을 읽어와서 배열을 만드는 함수 
 function allBtns() {
-    var buttons = document.querySelectorAll(".btn-primary") // class=btn-primary인 모든 element 선택
+    var buttons = document.querySelectorAll(".btn-outline-primary") // class=btn-primary인 모든 element 선택
     var all_buttons = []; // 빈 배열 만들고
     buttons.forEach(button => all_buttons.push(button.innerHTML)) // 각 버튼에 대해서 버튼에 있는 텍스트를 배열에 추가
     return all_buttons;
@@ -47,7 +47,7 @@ function allBtns() {
 
 // 왼쪽 사이드바에서 선택된 모든 버튼의 이름을 읽어와서 배열로 만드는 함수
 function selectedBtns() {
-    var actives = document.querySelectorAll(".btn-primary.active") // class="btn-primary active"인 모든 element 선택
+    var actives = document.querySelectorAll(".btn-outline-primary.active") // class="btn-primary active"인 모든 element 선택
     var selected_buttons = []; // 빈 배열 만들고
     actives.forEach(button => selected_buttons.push(button.innerHTML)) // 각 버튼에 대해서 버튼에 있는 텍스트를 배열에 추가
     return selected_buttons;
@@ -291,7 +291,7 @@ function update() {
 
 // 리셋 버튼 누르면 버튼 선택이 해제되게 하는 함수
 function resetWords() {
-    var actives = document.querySelectorAll(".btn-primary.active"); // 선택된 버튼 요소를 읽어와서
+    var actives = document.querySelectorAll(".btn-outline-primary.active"); // 선택된 버튼 요소를 읽어와서
 
     // 선택된 버튼 각각에 대해서
     actives.forEach(function (d) {
@@ -308,7 +308,7 @@ $(document).ready(function () {
     renderSVG() // 마지막으로 네트워크를 그린다
 
     // $(".btn-primary").on('click') does not work
-    $(document).on('click', ".btn-primary", function () { // 만약 단어 버튼이 클릭되면
+    $(document).on('click', ".btn-outline-primary", function () { // 만약 단어 버튼이 클릭되면
         console.log("clicked")
         update(); // 가운데 화면에 선택된 단어도 띄워주고, 노드/엣지 색깔도 바꿔주고, 오른쪽 제목-내용도 업데이트
     })
