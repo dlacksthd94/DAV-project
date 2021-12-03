@@ -216,7 +216,7 @@ function renderSVG() {
 
     // 1202 추가
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().distance(200).strength(.01))
+        .force("link", d3.forceLink().distance(1).strength(0.01))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2))
         // .force('x', d3.forceX(width / 2).strength(.1))
@@ -240,9 +240,9 @@ function renderSVG() {
         var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
             .data(json.links)
             .enter().append("line") // 선을 추가함
-            .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
+            // .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "link")
-            .style("stroke-width", function (d) { return d.weight*0.1}) // edge 굵기 지정
+            .style("stroke-width", function (d) { return d.weight}) // edge 굵기 지정
             .attr('stroke', 'grey') // edge 색상 지정
             .attr('id', function(d){
                 return d.source+"-"+d.target // edge id 지정: source-target 형식으로
@@ -254,16 +254,16 @@ function renderSVG() {
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
             .attr("class", "node") // 클래스는 node로 지정
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            .call(d3.drag().on("drag", dragged))
+            // .call(d3.drag().on("drag", dragged))
             
         // 노드에 원 추가
         node.append("circle")
-            .attr("r", (d => Math.sqrt(d.count))) // 노드 원 반지름 설정
+            .attr("r", (d => 2*Math.sqrt(d.count))) // 노드 원 반지름 설정
             .style('stroke-width', 2)
             .style('stroke', 'white')
             .attr('fill', function(d){
                 colors = ['white','red', 'green', 'blue']
-                return colors[d.group]
+                return colors[2]
             })
 
         // 노드에 텍스트 추가
@@ -292,12 +292,29 @@ function renderSVG() {
             .attr('x', d => d.bbox.x)
 
         // 1202 추가한 부분
+        node.call(d3.drag().on("drag", dragged))
         
         function dragged(d) {
-            d.x = d3.event.x, d.y = d3.event.y;
-            d3.select(this).attr("x", d.x).attr("y", d.y);
-            link.filter(function(l) { return l.source === d; }).attr("x1", d.x).attr("y1", d.y);
-            link.filter(function(l) { return l.target === d; }).attr("x2", d.x).attr("y2", d.y);
+            d.x = d3.event.x;
+            d.y = d3.event.y;
+            console.log('this', d3.select(this))
+            // d3.select(this).attr("x", d.x).attr("y", d.y);
+            d3.select(this).attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+            link
+                .filter(function(l) { 
+                    console.log(d.x, d.y)
+                    return l.source === d; 
+                })
+                .attr("x1", d.x)
+                .attr("y1", d.y);
+            
+            link
+                .filter(function(l) {
+                    console.log(d.x, d.y)
+                    return l.target === d; 
+                })
+                .attr("x2", d.x)
+                .attr("y2", d.y);
         }
         // function dragged(d) {
         //     d.fx = d3.event.x;
