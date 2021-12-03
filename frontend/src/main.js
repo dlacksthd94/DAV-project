@@ -83,7 +83,7 @@ function changeNodeColor() {
 
         // 만약 단어가 선택되지 않았으면
         }else{ 
-            circle.setAttribute("fill", "black") // 원을 검은색으로
+            circle.setAttribute("fill", "grey") // 원을 초록색으로
             rect.style.fill = "white" // 배경 사각형을 흰색으로
             text.style.fill = "black" // 이름 텍스트를 검은색으로
         }
@@ -100,11 +100,13 @@ function changeEdgeColor(){
     edges = document.querySelectorAll(".link") // 모든 edge 읽어오기(class=link)
     edges.forEach(function(edge){ // 각각의 edge에 대해서
         // 각 edge의 id는 "source-target" 형식으로 만들어짐 (아래쪽 코드 참고)
-        var idxs = edge.id.split("-") 
-        var names = [all[idxs[0]], all[idxs[1]]] // edge에 연결된 node 이름 2개
+        var names = edge.id.split("-") 
+        // var names = [all[idxs[0]], all[idxs[1]]] // edge에 연결된 node 이름 2개
+        // console.log(idxs)
+        // console.log(names)
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
-            edge.setAttribute("stroke", "red") // edge 색깔을 빨간색으로 만들기
+            edge.setAttribute("stroke", "orange") // edge 색깔을 빨간색으로 만들기
             names.forEach(function(name){ // 두 개의 node에 대해서
                 var group = document.getElementById(name) // 노드 element 선택하기(원+사각형+이름텍스트)
                 circle = group.childNodes[0] // 원
@@ -193,20 +195,22 @@ function searchAccordion() {
 function renderSVG() {
 
     // svg 캔버스 가로세로 지정
-    var width = 500,
-        height = 500
+    // var width = 100%,
+    //     height = 100%
 
     // id=svg인 영역에다가 빈 svg 추가하기
     var svg = d3.select("#svg").append("svg")
-        .attr("width", width)
-        .attr("height", height)
+        .attr("width", '100%')
+        .attr("height", '100%')
         // 1202 추가
         .call(d3.zoom().on("zoom", function () {
             svg.attr("transform", d3.event.transform)
         }))
         .append('g')
-
-
+    var size = d3.select("svg").node().getBoundingClientRect()
+    var width = size.width
+    var height = size.height
+    // console.log(size, width, height)
     // 그래프에서 밀집도, 노드 간 거리, 탄성(복원력) 등 설정 
     // var force = d3.layout.force()
     //     .gravity(.05)
@@ -245,7 +249,7 @@ function renderSVG() {
             .style("stroke-width", function (d) { return d.weight}) // edge 굵기 지정
             .attr('stroke', 'grey') // edge 색상 지정
             .attr('id', function(d){
-                return d.source+"-"+d.target // edge id 지정: source-target 형식으로
+                return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
             });
     
         // 노드 그리기
@@ -261,16 +265,14 @@ function renderSVG() {
             .attr("r", (d => 2*Math.sqrt(d.count))) // 노드 원 반지름 설정
             .style('stroke-width', 2)
             .style('stroke', 'white')
-            .attr('fill', function(d){
-                colors = ['white','red', 'green', 'blue']
-                return colors[2]
-            })
+            .attr('fill', 'grey')
 
         // 노드에 텍스트 추가
         node.append("text")
-            .attr("dx", 12) // 힘과 관련된 요인인데 잘은 모르겠네요
-            .attr("dy", ".35em") // 힘과 관련된 요인인데 잘은 모르겠네요
+            .attr("dx", 12) // 글자를 12만큼 오른쪽에
+            .attr("dy", ".35em")
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
+            .style("font-size", function(d){return (d.count*0.2+15).toString()+"px"})
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
@@ -297,12 +299,12 @@ function renderSVG() {
         function dragged(d) {
             d.x = d3.event.x;
             d.y = d3.event.y;
-            console.log('this', d3.select(this))
+            // console.log('this', d3.select(this))
             // d3.select(this).attr("x", d.x).attr("y", d.y);
             d3.select(this).attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
             link
                 .filter(function(l) { 
-                    console.log(d.x, d.y)
+                    // console.log(d.x, d.y)
                     return l.source === d; 
                 })
                 .attr("x1", d.x)
@@ -310,7 +312,7 @@ function renderSVG() {
             
             link
                 .filter(function(l) {
-                    console.log(d.x, d.y)
+                    // console.log(d.x, d.y)
                     return l.target === d; 
                 })
                 .attr("x2", d.x)
