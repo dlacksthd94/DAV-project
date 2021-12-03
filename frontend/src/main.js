@@ -65,27 +65,48 @@ function updateSelectedWords(){
 function changeNodeColor() {
     var all = allBtns(); // 모든 단어 (선택 x + 선택 o)
     var selected = selectedBtns() // 버튼이 선택된 단어
+    
+    var linked = []
+    edges = document.querySelectorAll(".link")
+    edges.forEach(function(edge){
+        var names = edge.id.split("-")
+        if (selected.some(name => names.includes(name))){
+            names.forEach(function(name){
+                if(!selected.includes(name) && !linked.includes(name)){
+                    linked.push(name)
+                }
+            })
+        }
+    })
 
     // 모든 단어에 대하여 (각 단어를 value라고 했을 때)
-    all.forEach(function (value) { 
-        var group = document.getElementById(value) // id=value인 node를 선택
+    all.forEach(function (name) { 
+        var group = document.getElementById(name) // id=value인 node를 선택
 
         // 하나의 노드는 원 하나, 배경 사각형 하나, 이름 텍스트 하나로 구성됨
         circle = group.childNodes[0] // 원
         rect = group.childNodes[1] // 배경 사각형
         text = group.childNodes[2] // 이름 텍스트
 
-        // 만약 단어(value)가 선택되었으면(in selected)
-        if (selected.includes(value)){ 
-            circle.setAttribute("fill", "red") // 원을 빨간색으로
-            rect.style.fill = "red" // 배경 사각형을 빨간색으로
-            text.style.fill = "white" // 이름 텍스트를 흰색으로
-
-        // 만약 단어가 선택되지 않았으면
-        }else{ 
-            circle.setAttribute("fill", "grey") // 원을 초록색으로
+        if (selected.includes(name)){
+            circle.setAttribute("fill", "blue") // 원을 파란색으로
+            circle.setAttribute("r", 15) // 원을 파란색으로
+            circle.style.stroke='white' // 원 테두리를 흰색으로
+            rect.style.stroke='none' // 사각형 테두리는 없음
+            rect.style.fill = "blue" // 배경 사각형을 파란색으로
+            text.style.fill = "white" // 글자는 흰색으로
+        }else if(linked.includes(name)){
+            circle.setAttribute("fill", "white") // 원을 파란색으로
+            circle.style.stroke='blue' // 원 테두리를 파란색으로
+            rect.style.stroke='none' // 사각형 테두리를 파란색으로
             rect.style.fill = "white" // 배경 사각형을 흰색으로
-            text.style.fill = "black" // 이름 텍스트를 검은색으로
+            text.style.fill='blue' // 글자는 파란색으로
+        }else{
+            circle.setAttribute("fill", "grey") // 원을 흰색으로
+            circle.style.stroke='white' // 원 테두리를 흰색으로
+            rect.style.stroke='none' // 사각형 테두리는 없음
+            rect.style.fill='white' // 배경은 흰색으로
+            text.style.fill='black' // 글자는 검은색으로
         }
     })
 }
@@ -94,32 +115,17 @@ function changeNodeColor() {
 function changeEdgeColor(){
     var all = allBtns(); // 모든 단어 (선택 x + 선택 o)
     var selected = selectedBtns() // 버튼이 선택된 단어
-
     // var selected_num = selected.map(v => all.indexOf(v).toString())
 
     edges = document.querySelectorAll(".link") // 모든 edge 읽어오기(class=link)
     edges.forEach(function(edge){ // 각각의 edge에 대해서
         // 각 edge의 id는 "source-target" 형식으로 만들어짐 (아래쪽 코드 참고)
         var names = edge.id.split("-") 
-        // var names = [all[idxs[0]], all[idxs[1]]] // edge에 연결된 node 이름 2개
-        // console.log(idxs)
-        // console.log(names)
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
-            edge.setAttribute("stroke", "orange") // edge 색깔을 빨간색으로 만들기
-            names.forEach(function(name){ // 두 개의 node에 대해서
-                var group = document.getElementById(name) // 노드 element 선택하기(원+사각형+이름텍스트)
-                circle = group.childNodes[0] // 원
-                rect = group.childNodes[1] // 배경 사각형
-                text = group.childNodes[2] // 이름 텍스트
-                if (!selected.includes(name)){ // 두 노드 중에서 선택되지 않은 단어는 
-                    circle.setAttribute("fill", "orange") // 원을 주황색으로
-                    rect.setAttribute('style', "fill: orange") // 배경 사각형도 주황색으로
-                }
-            })
-        // source, target 중 왼쪽 사이드바에서 선택된 노드가 없으면
-        }else{ 
-            edge.setAttribute("stroke", "grey") // edge 색을 다시 검은색으로
+            edge.setAttribute("stroke", "blue") // edge 색깔을 파란색으로 만들기
+        }else{
+            edge.setAttribute("stroke", "grey") // edge 색을 다시 회색으로
         }
     })
 }
@@ -263,7 +269,7 @@ function renderSVG() {
         // 노드에 원 추가
         node.append("circle")
             .attr("r", (d => 2*Math.sqrt(d.count))) // 노드 원 반지름 설정
-            .style('stroke-width', 2)
+            .style('stroke-width', 4)
             .style('stroke', 'white')
             .attr('fill', 'grey')
 
@@ -272,7 +278,7 @@ function renderSVG() {
             .attr("dx", 12) // 글자를 12만큼 오른쪽에
             .attr("dy", ".35em")
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
-            .style("font-size", function(d){return (d.count*0.2+15).toString()+"px"})
+            // .style("font-size", function(d){return (d.count*0.2+15).toString()+"px"})
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
