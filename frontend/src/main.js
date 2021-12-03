@@ -24,7 +24,7 @@ function addAccordion(container, num, title, episode){ // 추가할 위치, 각 
 
 // 선택한 키워드가 있는 우화 검색해서 오른쪽 사이드바에 항목 추가하는 함수 
 function renderAccordion(){
-    d3.csv(csv_url, function (csv){ // 일단 aesop.csv 읽어와서
+    d3.csv(csv_url, function (csv){ // 일단 word_info_episode.csv 읽어와서
         titles = [...new Set(csv.map(d => d.title))]; // 제목의 배열을 만들고
         episodes = [...new Set(csv.map(d => d.episode))]; // 내용의 배열을 만들고
         var container = document.getElementById("accordionGroup") // 내용을 추가할 영역 지정(id=accordionGroup)
@@ -200,12 +200,11 @@ function renderSVG() {
     var svg = d3.select("#svg").append("svg")
         .attr("width", width)
         .attr("height", height)
-
         // 1202 추가
         .call(d3.zoom().on("zoom", function () {
             svg.attr("transform", d3.event.transform)
         }))
-        .append('g');
+        .append('g')
 
 
     // 그래프에서 밀집도, 노드 간 거리, 탄성(복원력) 등 설정 
@@ -230,6 +229,25 @@ function renderSVG() {
         //     .nodes(json.nodes)
         //     .links(json.links)
         //     .start();
+        simulation
+            .nodes(json.nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(json.links);
+
+        // 엣지 그리기
+        var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
+            .data(json.links)
+            .enter().append("line") // 선을 추가함
+            .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
+            .attr("class", "link")
+            .style("stroke-width", function (d) { return d.weight*0.1}) // edge 굵기 지정
+            .attr('stroke', 'grey') // edge 색상 지정
+            .attr('id', function(d){
+                return d.source+"-"+d.target // edge id 지정: source-target 형식으로
+            });
+    
 
         // 노드 그리기
         var node = svg.selectAll(".node")
@@ -237,11 +255,17 @@ function renderSVG() {
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
             .attr("class", "node") // 클래스는 node로 지정
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            // .call(force.drag);
-        
+            .call(d3.drag().on("drag", dragged))
+            
         // 노드에 원 추가
         node.append("circle")
-            .attr("r", "5"); // 노드 원 반지름 설정
+            .attr("r", (d => Math.sqrt(d.count))) // 노드 원 반지름 설정
+            .style('stroke-width', 2)
+            .style('stroke', 'white')
+            .attr('fill', function(d){
+                colors = ['white','red', 'green', 'blue']
+                return colors[d.group]
+            })
 
         // 노드에 텍스트 추가
         node.append("text")
@@ -268,28 +292,18 @@ function renderSVG() {
             .attr('class', 'bbox')
             .attr('x', d => d.bbox.x)
             
-        // 엣지 그리기
-        var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
-            .data(json.links)
-            .enter().append("line") // 선을 추가함
-            .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
-            .attr("class", "link")
-            .style("stroke-width", function (d) { return d.weight/50}) // edge 굵기 지정
-            .attr('stroke', 'black') // edge 색상 지정
-            .attr('id', function(d){
-                return d.source+"-"+d.target // edge id 지정: source-target 형식으로
-            });
-        
-
         // 1202 추가한 부분
-
-        simulation
-            .nodes(json.nodes)
-            .on("tick", ticked);
-
-        simulation.force("link")
-            .links(json.links);
-
+        
+        function dragged(d) {
+            d.x = d3.event.x, d.y = d3.event.y;
+            d3.select(this).attr("x", d.x).attr("y", d.y);
+            link.filter(function(l) { return l.source === d; }).attr("x1", d.x).attr("y1", d.y);
+            link.filter(function(l) { return l.target === d; }).attr("x2", d.x).attr("y2", d.y);
+        }
+        // function dragged(d) {
+        //     d.fx = d3.event.x;
+        //     d.fy = d3.event.y;
+        // }
         function ticked() {
             link
                 .attr("x1", function(d) { return d.source.x; })
@@ -324,22 +338,19 @@ function renderSVG() {
     });
 };
 
-function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-}
+// function dragstarted(d) {
+//     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+//     d.fx = d.x;
+//     d.fy = d.y;
+// }
 
-function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-}
 
-function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-}
+
+// function dragended(d) {
+//     if (!d3.event.active) simulation.alphaTarget(0);
+//     d.fx = null;
+//     d.fy = null;
+// }
 
 // 화면 전체를 업데이트하는 함수
 function update() {
