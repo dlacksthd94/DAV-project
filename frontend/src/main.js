@@ -1,5 +1,5 @@
 // 그래프 노드, 엣지 정보 json 파일 url
-const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_animals.json";
+const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
 const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
