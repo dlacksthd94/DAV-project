@@ -1,7 +1,8 @@
 // 그래프 노드, 엣지 정보 json 파일 url
 const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_epi.json";
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
+// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
 
 // 그래프 json에서 node 읽어서 왼쪽 사이드바에 버튼 띄우는 함수
 function renderButtons() {
@@ -127,9 +128,17 @@ function changeEdgeColor(){
 function updateAccordion() {
     var all = allBtns(); // 모든 단어 목록 만들기
     var selected = selectedBtns(); // 선택된 단어 목록 만들기
-    d3.csv(csv_url, function (csv){ // Aesop.csv 읽어와서
-        titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
-        episodes = [...new Set(csv.map(d => d.episode))]; // 내용 배열 만들고
+    d3.csv(csv_url, function (csv){ // word_info.csv 읽어와서
+        // csv에서 word가 selected에 있는 행만 남긴다
+        filtered = csv.filter(function(d){
+            if (selected.includes(d.word)){
+                return d
+            }
+        })
+
+        // 그 중에서 title 리스트 만들고 episode 리스트 만든다
+        titles = [...new Set(filtered.map(d => d.title))]; // 제목 배열 만들고
+        episodes = [...new Set(filtered.map(d => d.episode))]; // 내용 배열 만들고
 
         // 일단 페이지 로딩 시에는 모든 우화의 제목-내용이 html에 들어가게 해두었음
         // updateAccordion 함수가 실행될 때마다, 선택한 단어가 없는 항목은 화면에서만 안 보이게 하는 것임
