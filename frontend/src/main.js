@@ -2,7 +2,7 @@
 const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_epi.json";
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.csv";
 
 // 그래프 json에서 node 읽어서 왼쪽 사이드바에 버튼 띄우는 함수
 function renderButtons() {
@@ -117,7 +117,7 @@ function changeEdgeColor(){
             })
         // source, target 중 왼쪽 사이드바에서 선택된 노드가 없으면
         }else{ 
-            edge.setAttribute("stroke", "black") // edge 색을 다시 검은색으로
+            edge.setAttribute("stroke", "grey") // edge 색을 다시 검은색으로
         }
     })
 }
@@ -248,7 +248,6 @@ function renderSVG() {
                 return d.source+"-"+d.target // edge id 지정: source-target 형식으로
             });
     
-
         // 노드 그리기
         var node = svg.selectAll(".node")
             .data(json.nodes)
@@ -291,7 +290,7 @@ function renderSVG() {
             .attr('height', d => d.bbox.height)
             .attr('class', 'bbox')
             .attr('x', d => d.bbox.x)
-            
+
         // 1202 추가한 부분
         
         function dragged(d) {
