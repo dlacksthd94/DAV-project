@@ -10,7 +10,7 @@ function renderButtons() {
         var container = document.getElementById('buttons') // bootstrap.html에서 버튼을 띄울 영역 지정(id=buttons)
         for (var i = 0; i < json.nodes.length; i++){ // 모든 node에 대해서
             var obj = json.nodes[i] // 노드 선택해서
-            var html = '<button type="button" class="btn btn-outline-primary m-1" data-bs-toggle="button" autocomplete="off">' + obj.name + '</button>' // 노드 이름을 넣은 버튼 html을 만들어서
+            var html = '<button type="button" id=btn-' + obj.name+ ' class="btn btn-outline-primary m-1" data-bs-toggle="button" autocomplete="off">' + obj.name + '</button>' // 노드 이름을 넣은 버튼 html을 만들어서
             container.innerHTML += html // 위에서 만든 html을 buttons 컨테이너 안에 추가
         }
     })
@@ -252,8 +252,12 @@ function renderSVG() {
             .enter().append("line") // 선을 추가함
             // .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "link")
-            .style("stroke-width", function (d) { return d.weight}) // edge 굵기 지정
-            .attr('stroke', 'grey') // edge 색상 지정
+            .attr('data-toggle', "tooltip")
+            .attr('data-placement',"right")
+            .attr('title', function (d){return d.source.name + "-" + d.target.name + " | weight: " + d.weight})
+            .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
+            .style("stroke-width", function (d) { return d.weight * 3}) // edge 굵기 지정
+            .attr('stroke', '#C0C0C0') // edge 색상 지정
             .attr('id', function(d){
                 return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
             });
@@ -263,12 +267,15 @@ function renderSVG() {
             .data(json.nodes)
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
             .attr("class", "node") // 클래스는 node로 지정
+            .attr('data-toggle', "tooltip")
+            .attr('data-placement',"right")
+            .attr('title', function (d){return d.name + " | count: " + d.count})
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
             // .call(d3.drag().on("drag", dragged))
             
         // 노드에 원 추가
         node.append("circle")
-            .attr("r", (d => 2*Math.sqrt(d.count))) // 노드 원 반지름 설정
+            .attr("r", (d => 2.5*Math.sqrt(d.count))) // 노드 원 반지름 설정
             .style('stroke-width', 4)
             .style('stroke', 'white')
             .attr('fill', 'grey')
@@ -427,7 +434,26 @@ $(document).ready(function () {
         }else{ // 만약 지우는 상황이 아니라면
             searchAccordion() // 지금 화면에 있는 것들 중에서 검색어가 들어간 항목만 남기고 나머지는 숨기기
         }
-    })   
+    })
+    $(document).on('click', '.node', function (element){ // 노드를 누르면
+        node = element.currentTarget
+        animal = node.id
+        console.log(animal)
+        btn = document.getElementById('btn-'+animal)
+        
+        console.log(btn)
+        btn.click()
+        // updateAccordion() // 일단 선택된 단어가 들어있는 제목-내용부터 띄운 뒤에 (to make sure)
+        // searchAccordion() // 검색어가 들어간 항목만 남기기
+    })
+    $(document).on('mouseover', '.node', function (element){ // 노드를 누르면
+        var animal = element.currentTarget.id
+        $("#"+animal).tooltip('show')
+    })
+    $(document).on('mouseover', '.link', function (element){ // 노드를 누르면
+        var animal = element.currentTarget.id
+        $("#"+animal).tooltip('show')
+    })
 })
 
 // episode = episodes[i].replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").toLowerCase();
