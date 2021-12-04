@@ -97,7 +97,7 @@ function changeNodeColor() {
 
         if (selected.includes(name)){
             circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
-            circle.setAttribute("r", 15)
+            // circle.setAttribute("r", 15)
             circle.style.stroke='white' // 원 테두리를 파란색
             rect.style.stroke='none' // 사각형 테두리는 없음
             rect.style.fill = "#0066FF" // 배경 사각형을 파란색으로
