@@ -4,6 +4,13 @@ const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaey
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
 const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
 
+// moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
+d3.selection.prototype.moveToFront = function() {
+    return this.each(function(){
+    this.parentNode.appendChild(this);
+    });
+};
+
 // 그래프 json에서 node 읽어서 왼쪽 사이드바에 버튼 띄우는 함수
 function renderButtons() {
     $.getJSON(json_url, function (json){ // 그래프 json 파일을 json으로 불러와서
@@ -89,18 +96,18 @@ function changeNodeColor() {
         text = group.childNodes[2] // 이름 텍스트
 
         if (selected.includes(name)){
-            circle.setAttribute("fill", "blue") // 원을 파란색으로
-            circle.setAttribute("r", 15) // 원을 파란색으로
-            circle.style.stroke='white' // 원 테두리를 흰색으로
+            circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
+            circle.setAttribute("r", 15)
+            circle.style.stroke='white' // 원 테두리를 파란색
             rect.style.stroke='none' // 사각형 테두리는 없음
-            rect.style.fill = "blue" // 배경 사각형을 파란색으로
+            rect.style.fill = "#0066FF" // 배경 사각형을 파란색으로
             text.style.fill = "white" // 글자는 흰색으로
         }else if(linked.includes(name)){
             circle.setAttribute("fill", "white") // 원을 파란색으로
-            circle.style.stroke='blue' // 원 테두리를 파란색으로
+            circle.style.stroke='#0066FF' // 원 테두리를 없애고
             rect.style.stroke='none' // 사각형 테두리를 파란색으로
             rect.style.fill = "white" // 배경 사각형을 흰색으로
-            text.style.fill='blue' // 글자는 파란색으로
+            text.style.fill='#0066FF' // 글자는 파란색으로
         }else{
             circle.setAttribute("fill", "grey") // 원을 흰색으로
             circle.style.stroke='white' // 원 테두리를 흰색으로
@@ -123,11 +130,17 @@ function changeEdgeColor(){
         var names = edge.id.split("-") 
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
-            edge.setAttribute("stroke", "blue") // edge 색깔을 파란색으로 만들기
+            edge.setAttribute("stroke", "#0066FF") // edge 색깔을 파란색으로 만들기
+            edge.classList.add("highlighted")
         }else{
-            edge.setAttribute("stroke", "grey") // edge 색을 다시 회색으로
+            edge.setAttribute("stroke", '#C0C0C0') // edge 색을 다시 회색으로
+            edge.classList.remove("highlighted")
+                
         }
     })
+    
+    d3.selectAll('.highlighted').moveToFront();
+    d3.selectAll('.node').moveToFront();
 }
 
 // 선택된 단어가 들어간 스토리를 오른쪽 사이드바에 추가하는 함수
@@ -226,8 +239,8 @@ function renderSVG() {
 
     // 1202 추가
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().distance(1).strength(0.01))
-        .force("charge", d3.forceManyBody())
+        .force("link", d3.forceLink().distance(1).strength(0.008))
+        .force("charge", d3.forceManyBody().strength(-50))
         .force("center", d3.forceCenter(width / 2, height / 2))
         // .force('x', d3.forceX(width / 2).strength(.1))
         // .force('y',  d3.forceY(height / 2).strength(.1))
@@ -256,7 +269,7 @@ function renderSVG() {
             .attr('data-placement',"right")
             .attr('title', function (d){return d.source.name + "-" + d.target.name + " | weight: " + d.weight})
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            .style("stroke-width", function (d) { return d.weight * 3}) // edge 굵기 지정
+            .style("stroke-width", function (d) { return d.weight * 2.5}) // edge 굵기 지정
             .attr('stroke', '#C0C0C0') // edge 색상 지정
             .attr('id', function(d){
                 return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
@@ -275,17 +288,17 @@ function renderSVG() {
             
         // 노드에 원 추가
         node.append("circle")
-            .attr("r", (d => 2.5*Math.sqrt(d.count))) // 노드 원 반지름 설정
+            .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
             .style('stroke-width', 4)
             .style('stroke', 'white')
             .attr('fill', 'grey')
 
         // 노드에 텍스트 추가
         node.append("text")
-            .attr("dx", 12) // 글자를 12만큼 오른쪽에
-            .attr("dy", ".35em")
+            // .attr("x", 0)
+            .attr("dy", (d => -4-3*Math.sqrt(d.count)))
+            .attr("text-anchor", "middle")
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
-            // .style("font-size", function(d){return (d.count*0.2+15).toString()+"px"})
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
@@ -358,12 +371,7 @@ function renderSVG() {
         //     node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
         // });
 
-        // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
-        d3.selection.prototype.moveToFront = function() {
-            return this.each(function(){
-            this.parentNode.appendChild(this);
-            });
-        };
+        
         // 각 노드를 화면 맨 위로 올려줌 (엣지 뒤에 가려지지 않게)
         d3.selectAll('.node').moveToFront();
     });
