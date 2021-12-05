@@ -3,6 +3,14 @@ const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaey
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
 const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
+// 제목으로 그림 찾을 수 있는 json 파일 url
+const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/picture.json'
+// const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
+
+var url_json = 'before assign'
+$.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
+    url_json = json
+})
 
 // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
 d3.selection.prototype.moveToFront = function() {
@@ -24,8 +32,8 @@ function renderButtons() {
 }
 
 // 오른쪽 사이드바에 우화 제목/내용 항목 1개 추가하는 함수 
-function addAccordion(container, num, title, episode){ // 추가할 위치, 각 항목 구분을 위한 번호, 제목, 내용 입력받아서
-    var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
+function addAccordion(container, num, title, episode, image_url){ // 추가할 위치, 각 항목 구분을 위한 번호, 제목, 내용 입력받아서
+    var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + '></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
     container.innerHTML += html // 위에서 만든 html을 container 내에 추가
 };
 
@@ -35,12 +43,18 @@ function renderAccordion(){
         titles = [...new Set(csv.map(d => d.title))]; // 제목의 배열을 만들고
         episodes = [...new Set(csv.map(d => d.episode))]; // 내용의 배열을 만들고
         var container = document.getElementById("accordionGroup") // 내용을 추가할 영역 지정(id=accordionGroup)
-        container.innerHTML = "" // 일단 accordionGroup에 표시된 내용 전부 지우고
+        container.innerHTML = "" // 일단 accordionGroup에 표시된 내용 전부 지우고        
         for (var i = 0; i < titles.length; i++){ // 모든 제목-내용에 대해서
             title = titles[i] // 제목 선택
             episode = episodes[i] // 내용 선택
             num = (i + 1).toString() // 제목-내용 번호
-            addAccordion(container = container, num = num, title = title, episode = episode) // id에 번호 붙여서 제목-내용 항목을 accordionGroup에 추가
+            var list_url = url_json.filter(
+                function(e) {
+                    return e.title == title
+                }
+            )
+            var image_url = list_url[0]
+            addAccordion(container = container, num = num, title = title, episode = episode, image_url = image_url) // id에 번호 붙여서 제목-내용 항목을 accordionGroup에 추가
         }
     })
 }
