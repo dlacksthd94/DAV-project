@@ -4,7 +4,7 @@ const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaey
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
 const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
 // 제목으로 그림 찾을 수 있는 json 파일 url
-const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/picture.json'
+const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong-picture/backend/data/picture.json'
 // const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
 
 var url_json = 'before assign'
@@ -33,7 +33,11 @@ function renderButtons() {
 
 // 오른쪽 사이드바에 우화 제목/내용 항목 1개 추가하는 함수 
 function addAccordion(container, num, title, episode, image_url){ // 추가할 위치, 각 항목 구분을 위한 번호, 제목, 내용 입력받아서
-    var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + '></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
+    if (image_url == 'empty') {
+        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
+    } else {
+        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + '></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정, 그림 추가
+    }
     container.innerHTML += html // 위에서 만든 html을 container 내에 추가
 };
 
@@ -48,12 +52,17 @@ function renderAccordion(){
             title = titles[i] // 제목 선택
             episode = episodes[i] // 내용 선택
             num = (i + 1).toString() // 제목-내용 번호
-            var list_url = url_json.filter(
+            var element = url_json.filter( // 제목에 해당하는 element 선택
                 function(e) {
                     return e.title == title
                 }
             )
-            var image_url = list_url[0]
+            var image_url = 'empty' // 이미지 url 초기값
+            if (element[0]) {
+                if (element[0].image_urls[0]) {
+                    image_url = element[0].image_urls[0] // 제목에 해당하는 element가 존재하고 이미지 url이 존재할 때, 첫 번째 url은 `image_url` 변수에 할당해줌
+                }
+            }
             addAccordion(container = container, num = num, title = title, episode = episode, image_url = image_url) // id에 번호 붙여서 제목-내용 항목을 accordionGroup에 추가
         }
     })
