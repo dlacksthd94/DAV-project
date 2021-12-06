@@ -171,10 +171,12 @@ function updateAccordion() {
             // 검색 고도화 시 수정할 부분!!
             var title = d.getElementsByClassName('accordion-button')[0].innerHTML // 제목을 읽어오고
             var episode = d.getElementsByClassName('accordion-body')[0].innerHTML // 내용을 읽어와서
-            var string = (title + " " + episode).toLowerCase() // 제목과 내용을 하나의 문자열로 합친 다음에
+            // var string = (title + " " + episode).toLowerCase() // 제목과 내용을 하나의 문자열로 합친 다음에
 
+            
+            if (titles.includes(title) && episodes.include(episode)){ 
             // 버튼을 선택한 모든 단어가 제목+내용 안에 있으면
-            if (selected.every(v => string.includes(v))){ 
+            // if (selected.every(v => string.includes(v))){ 
                 d.hidden = false // 화면에서 숨김 해제
 
             // 버튼을 선택한 단어 중 하나라도 제목+내용 안에 없으면
