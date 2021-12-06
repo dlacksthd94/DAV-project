@@ -174,7 +174,7 @@ function updateAccordion() {
             // var string = (title + " " + episode).toLowerCase() // 제목과 내용을 하나의 문자열로 합친 다음에
 
             
-            if (titles.includes(title) && episodes.include(episode)){ 
+            if (titles.includes(title) && episodes.includes(episode)){ 
             // 버튼을 선택한 모든 단어가 제목+내용 안에 있으면
             // if (selected.every(v => string.includes(v))){ 
                 d.hidden = false // 화면에서 숨김 해제
