@@ -150,16 +150,33 @@ function updateAccordion() {
     var all = allBtns(); // 모든 단어 목록 만들기
     var selected = selectedBtns(); // 선택된 단어 목록 만들기
     d3.csv(csv_url, function (csv){ // word_info.csv 읽어와서
-        // csv에서 word가 selected에 있는 행만 남긴다
-        filtered = csv.filter(function(d){
-            if (selected.includes(d.word)){
-                return d
+        titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
+        // episodes = [...new Set(csv.map(d => d.episode))]; // 내용 배열 만들고
+        words = []
+        titles.forEach(function(t){
+            filtered = csv.filter(function(d){
+                if (d.title == t){
+                    return d
+                }
+            })
+            filtered_words = filtered.map(d=>d.word)
+            // words.push(filtered_words)
+            if (selected.every(w => filtered_words.includes(w))){
+                words.push(true)
+            }else{
+                words.push(false)
             }
         })
+        // // csv에서 word가 selected에 있는 행만 남긴다
+        // filtered = csv.filter(function(d){
+        //     if (selected.includes(d.word)){
+        //         return d
+        //     }
+        // })
 
         // 그 중에서 title 리스트 만들고 episode 리스트 만든다
-        titles = [...new Set(filtered.map(d => d.title))]; // 제목 배열 만들고
-        episodes = [...new Set(filtered.map(d => d.episode))]; // 내용 배열 만들고
+        // titles = [...new Set(filtered.map(d => d.title))]; // 제목 배열 만들고
+        // episodes = [...new Set(filtered.map(d => d.episode))]; // 내용 배열 만들고
 
         // 일단 페이지 로딩 시에는 모든 우화의 제목-내용이 html에 들어가게 해두었음
         // updateAccordion 함수가 실행될 때마다, 선택한 단어가 없는 항목은 화면에서만 안 보이게 하는 것임
@@ -170,11 +187,12 @@ function updateAccordion() {
 
             // 검색 고도화 시 수정할 부분!!
             var title = d.getElementsByClassName('accordion-button')[0].innerHTML // 제목을 읽어오고
-            var episode = d.getElementsByClassName('accordion-body')[0].innerHTML // 내용을 읽어와서
+            // var episode = d.getElementsByClassName('accordion-body')[0].innerHTML // 내용을 읽어와서
             // var string = (title + " " + episode).toLowerCase() // 제목과 내용을 하나의 문자열로 합친 다음에
 
             
-            if (titles.includes(title) && episodes.includes(episode)){ 
+            if (words[titles.indexOf(title)] == true){
+            // }  titles.includes(title) && episodes.includes(episode)){ 
             // 버튼을 선택한 모든 단어가 제목+내용 안에 있으면
             // if (selected.every(v => string.includes(v))){ 
                 d.hidden = false // 화면에서 숨김 해제
