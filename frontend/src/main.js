@@ -59,8 +59,34 @@ $('#anchor2').rangeSlider(
 var node_min = 0, node_max = 30;
 var edge_min = 0, edge_max = 8;
 
-$('#anchor1').rangeSlider('onChange', event => {node_min, node_max = event.detail.values; });
-$('#anchor2').rangeSlider('onChange', event => {edge_min, edge_max = event.detail.values});
+$('#anchor1').rangeSlider('onChange', event => {[node_min, node_max]=event.detail.values; updateSVG(node_min, node_max, edge_min, edge_max)});
+$('#anchor2').rangeSlider('onChange', event => {[edge_min, edge_max]=event.detail.values; updateSVG(node_min, node_max, edge_min, edge_max)});
+
+function updateSVG(node_min, node_max, edge_min, edge_max){
+    nodes = document.querySelectorAll(".node") // tag = node인 element 모두 모으기
+    edges = document.querySelectorAll(".link") // tag = link인 element 모두 모으기
+    // console.log(edges)
+    hidden_nodes = []
+    nodes.forEach(function(node){
+        count = node.getAttribute('count')
+        if (node_min <= count && count <= node_max){
+            node.setAttribute('visibility', 'visible') 
+        }else{
+            node.setAttribute('visibility', 'hidden')
+            node_name = node.id
+            hidden_nodes.push(node_name)
+        }
+    })
+    edges.forEach(function(edge){
+        source_target = edge.id
+        weight = edge.getAttribute('weight')
+        if(!(hidden_nodes.some(node_name => source_target.includes(node_name))) && (edge_min <= weight && weight <= edge_max)){
+            edge.setAttribute('visibility', 'visible')
+        }else{
+            edge.setAttribute('visibility', 'hidden')
+        }
+    })
+}
 
 
 // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
@@ -428,12 +454,13 @@ function renderSVG() {
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
             .attr('title', function (d){return d.source.name + "-" + d.target.name + " | weight: " + d.weight})
-            .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
+            // .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
             .style("stroke-width", function (d) { return d.weight * 2.5}) // edge 굵기 지정
             .attr('stroke', '#C0C0C0') // edge 색상 지정
             .attr('id', function(d){
                 return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
-            });
+            })
+            .attr('weight', function(d){return d.weight})
     
         // 노드 그리기
         var node = svg.selectAll(".node")
@@ -445,6 +472,7 @@ function renderSVG() {
             .attr('data-placement',"right")
             .attr('title', function (d){return d.name + " | count: " + d.count})
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
+            .attr('count', function(d){return d.count})
             // .call(d3.drag().on("drag", dragged))
             
         // 노드에 원 추가
