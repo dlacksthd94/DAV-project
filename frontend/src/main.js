@@ -1,16 +1,11 @@
 // 그래프 노드, 엣지 정보 json 파일 url
-const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/graph_animals.json";
-// 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
-// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/word_info_episode.csv";
-// 제목으로 그림 찾을 수 있는 json 파일 url
-const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/picture.json'
-// const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/graph_animals.json";
+const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_nips.json"
+// const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_animals.json";
 
-var img_url_json = 'before assign'
-$.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
-    img_url_json = json
-})
+// 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
+// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/neurips21.csv";
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/word_info_epi_nips.csv";
+
 
 // 노드 필터링 슬라이더
 $('#anchor1').rangeSlider(
@@ -25,9 +20,9 @@ $('#anchor1').rangeSlider(
   },
   {
     step: 1,
-    values: [0, 30],
+    values: [0, 353],
     min: 0,
-    max: 30,
+    max: 353,
   },
 );
 
@@ -44,14 +39,14 @@ $('#anchor2').rangeSlider(
   },
   {
     step: 1,
-    values: [0, 8],
+    values: [0, 171],
     min: 0,
-    max: 8,
+    max: 171,
   },
 );
 
-var node_min = 0, node_max = 30;
-var edge_min = 0, edge_max = 8;
+var node_min = 0, node_max = 353;
+var edge_min = 0, edge_max = 171;
 
 $('#anchor1').rangeSlider('onChange', event => {[node_min, node_max]=event.detail.values; updateSVG(node_min, node_max, edge_min, edge_max)});
 $('#anchor2').rangeSlider('onChange', event => {[edge_min, edge_max]=event.detail.values; updateSVG(node_min, node_max, edge_min, edge_max)});
@@ -64,13 +59,14 @@ function updateSVG(node_min, node_max, edge_min, edge_max){
     nodes.forEach(function(node){
         count = node.getAttribute('count')
         if (node_min <= count && count <= node_max){
-            node.setAttribute('visibility', 'visible') 
+            node.setAttribute('visibility', 'visible')
         }else{
             node.setAttribute('visibility', 'hidden')
             node_name = node.id
             hidden_nodes.push(node_name)
         }
     })
+    // console.log(edges)
     edges.forEach(function(edge){
         source_target = edge.id
         weight = edge.getAttribute('weight')
@@ -103,12 +99,8 @@ function renderButtons() {
 }
 
 // 오른쪽 사이드바에 우화 제목/내용 항목 1개 추가하는 함수 
-function addAccordion(container, num, title, episode, image_url){ // 추가할 위치, 각 항목 구분을 위한 번호, 제목, 내용 입력받아서
-    if (image_url == 'empty') {
-        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
-    } else {
-        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + ' class="img-fluid"></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정, 그림 추가
-    }
+function addAccordion(container, num, title, episode){ // 추가할 위치, 각 항목 구분을 위한 번호, 제목, 내용 입력받아서
+    var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
     container.innerHTML += html // 위에서 만든 html을 container 내에 추가
 };
 
@@ -118,23 +110,12 @@ function renderAccordion(){
         titles = [...new Set(csv.map(d => d.title))]; // 제목의 배열을 만들고
         episodes = [...new Set(csv.map(d => d.episode))]; // 내용의 배열을 만들고
         var container = document.getElementById("accordionGroup") // 내용을 추가할 영역 지정(id=accordionGroup)
-        container.innerHTML = "" // 일단 accordionGroup에 표시된 내용 전부 지우고        
-        for (var i = 0; i < titles.length; i++){ // 모든 제목-내용에 대해서
+        container.innerHTML = "" // 일단 accordionGroup에 표시된 내용 전부 지우고
+        for (var i = 0; i < titles.length/10; i++){ // 모든 제목-내용에 대해서
             title = titles[i] // 제목 선택
             episode = episodes[i] // 내용 선택
             num = (i + 1).toString() // 제목-내용 번호
-            var element = img_url_json.filter( // 제목에 해당하는 element 선택
-                function(e) {
-                    return e.title == title
-                }
-            )
-            var image_url = 'empty' // 이미지 url 초기값
-            if (element[0]) {
-                if (element[0].image_urls[0]) {
-                    image_url = element[0].image_urls[0] // 제목에 해당하는 element가 존재하고 이미지 url이 존재할 때, 첫 번째 url은 `image_url` 변수에 할당해줌
-                }
-            }
-            addAccordion(container = container, num = num, title = title, episode = episode, image_url = image_url) // id에 번호 붙여서 제목-내용 항목을 accordionGroup에 추가
+            addAccordion(container = container, num = num, title = title, episode = episode) // id에 번호 붙여서 제목-내용 항목을 accordionGroup에 추가
         }
     })
 }
@@ -170,7 +151,7 @@ function changeNodeColor() {
     var linked = []
     edges = document.querySelectorAll(".link")
     edges.forEach(function(edge){
-        var names = edge.id.split("-")
+        var names = edge.id.split("_")
         if (selected.some(name => names.includes(name))){
             names.forEach(function(name){
                 if(!selected.includes(name) && !linked.includes(name)){
@@ -182,31 +163,34 @@ function changeNodeColor() {
 
     // 모든 단어에 대하여 (각 단어를 value라고 했을 때)
     all.forEach(function (name) { 
-        var group = document.getElementById(name) // id=value인 node를 선택
-
+        var group = document.querySelector("g#"+name) // id=value인 node를 선택
+        // console.log(group)
         // 하나의 노드는 원 하나, 배경 사각형 하나, 이름 텍스트 하나로 구성됨
-        circle = group.childNodes[0] // 원
-        rect = group.childNodes[1] // 배경 사각형
-        text = group.childNodes[2] // 이름 텍스트
-
+        // circle = group.childNodes[0] // 원
+        // rect = group.childNodes[1] // 배경 사각형
+        // text = group.childNodes[2] // 이름 텍스트
+        rect = group.childNodes[0] // 배경 사각형
+        text = group.childNodes[1] // 이름 텍스트
+        // console.log(rect)
+        // console.log(text)
         if (selected.includes(name)){
-            circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
+            // circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
             // circle.setAttribute("r", 15)
-            circle.style.stroke='white' // 원 테두리를 파란색
+            // circle.style.stroke='white' // 원 테두리를 파란색
             rect.style.stroke='none' // 사각형 테두리는 없음
             rect.style.fill = "#0066FF" // 배경 사각형을 파란색으로
             text.style.fill = "white" // 글자는 흰색으로
         }else if(linked.includes(name)){
-            circle.setAttribute("fill", "white") // 원을 파란색으로
-            circle.style.stroke='#0066FF' // 원 테두리를 없애고
+            // circle.setAttribute("fill", "white") // 원을 파란색으로
+            // circle.style.stroke='#0066FF' // 원 테두리를 없애고
             rect.style.stroke='none' // 사각형 테두리를 파란색으로
-            rect.style.fill = "white" // 배경 사각형을 흰색으로
+            rect.style.fill = "none" // 배경 사각형을 흰색으로
             text.style.fill='#0066FF' // 글자는 파란색으로
         }else{
-            circle.setAttribute("fill", "grey") // 원을 흰색으로
-            circle.style.stroke='white' // 원 테두리를 흰색으로
+            // circle.setAttribute("fill", "grey") // 원을 흰색으로
+            // circle.style.stroke='white' // 원 테두리를 흰색으로
             rect.style.stroke='none' // 사각형 테두리는 없음
-            rect.style.fill='white' // 배경은 흰색으로
+            rect.style.fill='none' // 배경은 흰색으로
             text.style.fill='black' // 글자는 검은색으로
         }
     })
@@ -221,9 +205,10 @@ function changeEdgeColor(){
     edges = document.querySelectorAll(".link") // 모든 edge 읽어오기(class=link)
     edges.forEach(function(edge){ // 각각의 edge에 대해서
         // 각 edge의 id는 "source-target" 형식으로 만들어짐 (아래쪽 코드 참고)
-        var names = edge.id.split("-") 
+        var names = edge.id.split("_") 
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
+            // console.log(names)
             edge.setAttribute("stroke", "#0066FF") // edge 색깔을 파란색으로 만들기
             edge.classList.add("highlighted")
         }else{
@@ -244,7 +229,7 @@ function updateAccordion() {
     var all = allBtns(); // 모든 단어 목록 만들기
     var selected = selectedBtns(); // 선택된 단어 목록 만들기
     d3.csv(csv_url, function (csv){ // word_info.csv 읽어와서
-        titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
+        var titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
         // episodes = [...new Set(csv.map(d => d.episode))]; // 내용 배열 만들고
         words = []
         titles.forEach(function(t){
@@ -378,24 +363,24 @@ function renderSVG() {
         var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
             .data(json.links)
             .enter().append("line") // 선을 추가함
-            .filter(function(d){return d.weight >= edge_min & d.weight <= edge_max}) // edge 필터링: weight가 edge_min, edge_max 사이인 경우만
+            // .filter(function(d){return d.weight > 10}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "link")
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
             .attr('title', function (d){return d.source.name + "-" + d.target.name + " | weight: " + d.weight})
-            // .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            .style("stroke-width", function (d) { return d.weight * 2.5}) // edge 굵기 지정
+            .attr('weight', function (d) {return d.weight})
+            .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
+            .style("stroke-width", function (d) { return d.weight/10}) // edge 굵기 지정
             .attr('stroke', '#C0C0C0') // edge 색상 지정
             .attr('id', function(d){
-                return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
-            })
-            .attr('weight', function(d){return d.weight})
+                return d.source.name+"_"+d.target.name // edge id 지정: source-target 형식으로
+            });
     
         // 노드 그리기
         var node = svg.selectAll(".node")
             .data(json.nodes)
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
-            .filter(function(d){return d.count >= node_min & d.count <= node_max}) // node 필터링: counte가 node_min, node_max 사이인 경우만
+            // .filter(function(d){return d.count > 50}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "node") // 클래스는 node로 지정
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
@@ -405,19 +390,26 @@ function renderSVG() {
             // .call(d3.drag().on("drag", dragged))
             
         // 노드에 원 추가
-        node.append("circle")
-            .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
-            .style('stroke-width', 4)
-            .style('stroke', 'white')
-            .attr('fill', 'grey')
+        // node.append("circle")
+        //     // .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
+        //     // .style('stroke-width', 4)
+        //     // .style('stroke', 'white')
+        //     // .attr('fill', 'grey')
+        //     .attr('r', 0)
 
         // 노드에 텍스트 추가
         node.append("text")
             // .attr("x", 0)
-            .attr("dy", (d => -4-3*Math.sqrt(d.count)))
+            // .attr("dy", (d => -4-3*Math.sqrt(d.count)))
             .attr("text-anchor", "middle")
+            .attr("font-size", d => Math.sqrt(d.count))
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
+            // .style("fill",function(d) {
+            //     colors = ['none', 'red', 'green', 'blue']
+            //     return colors[d.group]
+            //     // return "hsl(" + Math.random() * 360 + ",100%,50%)";
+            //     })
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
         function getBBox(selection){
@@ -429,7 +421,7 @@ function renderSVG() {
         // 배경 사각형 만들기
         node.insert('rect', 'text') // node의 text에다가 사각형을 추가해줌
         // 위치, 크기, 클래스, 색상 지정
-            .attr('fill', 'white')
+            .attr('fill', 'none')
             .attr('x', d => d.bbox.x)
             .attr('y', d => d.bbox.y)
             .attr('width', d => d.bbox.width)
@@ -518,10 +510,6 @@ function update() {
     searchAccordion(); // 혹시나 검색어가 있으면 검색어를 포함하는 항목만 남기기
 }
 
-function update_SVG(node_min, node_max, edge_min, edge_max) {
-    ;
-}
-
 // 리셋 버튼 누르면 버튼 선택이 해제되게 하는 함수
 function resetWords() {
     var actives = document.querySelectorAll(".btn-outline-primary.active"); // 선택된 버튼 요소를 읽어와서
@@ -567,6 +555,7 @@ $(document).ready(function () {
     })
     $(document).on('click', '.node', function (element){ // 노드를 누르면
         node = element.currentTarget
+        console.log(node)
         animal = node.id
         console.log(animal)
         btn = document.getElementById('btn-'+animal)

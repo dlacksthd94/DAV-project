@@ -52,10 +52,11 @@
     .scale__value:hover{color:#a8abbf}
 
     div[id^='anchor'] {
+    max-width: 100%;
     width: 95%;
     margin: 0px;
     margin-top: -5px;
-    margin-bottom: 10px;
+    margin-bottom: -20px;
     }
 
     .demo-wrapper {
@@ -65,6 +66,9 @@
     float: left;
     width: 48%;
     margin: 1%;
+    /* border-color: #d84d4d;
+    border-width: 2px;
+    border-style: double; */
     }
 
     body {
@@ -85,7 +89,7 @@
                 <div class="container-fluid">
                     <!-- 내비게이션 바 제목 -->
                     <!-- 링크 추가하면 좋을 듯 href -->
-                    <a class="navbar-brand" href="#">Word Network of Aesop's Fables</a> 
+                    <a class="navbar-brand" href="#">Word Network Generator</a> 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -131,11 +135,11 @@
 
                 <!-- 노드, 엣지 필터링 슬라이더 -->
                 <div class="demo-wrapper">
-                    <div id="anchor1" style="margin-bottom: -20px;"></div>
+                    <div id="anchor1"></div>
                     <h5>Node Range</h5>
                 </div>
                 <div class="demo-wrapper">
-                    <div id="anchor2" style="margin-bottom: -20px;"></div>
+                    <div id="anchor2"></div>
                     <h5>Edge Range</h5>
                 </div>
 
