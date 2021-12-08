@@ -4,13 +4,64 @@ const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaey
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
 const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
 // 제목으로 그림 찾을 수 있는 json 파일 url
-const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong-picture/backend/data/picture.json'
+const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/picture.json'
 // const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
 
-var url_json = 'before assign'
+var img_url_json = 'before assign'
 $.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
-    url_json = json
+    img_url_json = json
 })
+
+var img_url_json = 'before assign'
+$.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
+    img_url_json = json
+})
+
+
+// 노드 필터링 슬라이더
+$('#anchor1').rangeSlider(
+  {
+    direction: 'horizontal', // or vertical
+    settings: false,
+    skin: 'red',
+    type: 'interval', // or single
+    scale: false,
+    tip: true,
+    bar: true,
+  },
+  {
+    step: 1,
+    values: [0, 30],
+    min: 0,
+    max: 30,
+  },
+);
+
+// 엣지 필터링 슬라이더
+$('#anchor2').rangeSlider(
+  {
+    direction: 'horizontal', // or vertical
+    settings: false,
+    skin: 'red',
+    type: 'interval', // or single
+    scale: false,
+    tip: true,
+    bar: true,
+  },
+  {
+    step: 1,
+    values: [0, 8],
+    min: 0,
+    max: 8,
+  },
+);
+
+var node_min = 0, node_max = 30;
+var edge_min = 0, edge_max = 8;
+
+$('#anchor1').rangeSlider('onChange', event => {node_min, node_max = event.detail.values; });
+$('#anchor2').rangeSlider('onChange', event => {edge_min, edge_max = event.detail.values});
+
 
 // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
 d3.selection.prototype.moveToFront = function() {
@@ -36,7 +87,7 @@ function addAccordion(container, num, title, episode, image_url){ // 추가할 �
     if (image_url == 'empty') {
         var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정
     } else {
-        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + '></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정, 그림 추가
+        var html = '<div class="accordion-item"><h2 class="accordion-header" id="heading' + num + '"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + num + '" aria-expanded="true" aria-controls="collapse' + num + '">' + title + '</button></h2><div id="collapse' + num + '" class="accordion-collapse collapse" aria-labelledby="heading' + num + '" data-bs-parent="#accordionGroup"><div class="accordion-body">' + episode + '</div><img src=' + image_url + ' class="img-fluid"></div></div>' // 항목 html 만들기: 번호가 포함된 id 지정, 제목/내용 지정, 그림 추가
     }
     container.innerHTML += html // 위에서 만든 html을 container 내에 추가
 };
@@ -52,7 +103,7 @@ function renderAccordion(){
             title = titles[i] // 제목 선택
             episode = episodes[i] // 내용 선택
             num = (i + 1).toString() // 제목-내용 번호
-            var element = url_json.filter( // 제목에 해당하는 element 선택
+            var element = img_url_json.filter( // 제목에 해당하는 element 선택
                 function(e) {
                     return e.title == title
                 }
@@ -290,6 +341,72 @@ function renderSVG() {
 
     // 그래프 그리는 부분
     d3.json(json_url, function (json) {
+        // var json = {};
+
+        // // 노드의 idx와 name으로 딕셔너리 만들기
+        // var dict_idx2node = {};
+        // for (var i = 0; i < json_original.nodes.length; i++) {
+        //     var element = json_original.nodes[i];
+        //     var name = element.name;
+        //     dict_idx2node[name] = i;
+        // };
+        // console.log(dict_idx2node);
+
+        // // 노드 min, max 범위 내 노드 선택
+        // json.nodes = json_original.nodes.filter(
+        //     function(e) {
+        //         return (e.count >= node_min) && (e.count <= node_max);
+        //     }
+        // );
+        // console.log(json_original.nodes);
+        // console.log(json.nodes);
+
+        // var dict_oldIdx2newIdx = {};
+        // for (var i = 0; i < json.nodes.length; i++) {
+        //     var element = json.nodes[i];
+        //     var name = element.name;
+        //     oldIdx = dict_idx2node[name];
+        //     dict_oldIdx2newIdx[oldIdx] = i;
+        // };
+        // console.log(dict_oldIdx2newIdx);
+
+        // for (var i = 0; i < json_original.links.length; i++) {
+        //     link = json_original.links[i]
+        //     if ((link.source < json.nodes.length) && (link.target < json.nodes.length)) {
+        //         link.source = dict_oldIdx2newIdx[link.source]
+        //         link.target = dict_oldIdx2newIdx[link.target]
+
+        //     }
+        // }
+
+        // var links = [];
+        // // 새로운 노드 idx에 맞게 edge의 source, target idx 수정
+        // for (var i = 0; i < json_original.links.length; i++) {
+        //     link = json_original.links[i];
+        // }
+
+        // // 선택된 노드 index 리스트
+        // var list_selected_node = []
+        // for (var i = 0; i < json_nodes.length; i++) {
+        //     row = json_nodes[i];
+        //     var name = row.index
+        //     if (!list_selected_node.includes(name)) {
+        //         list_selected_node.push(name);
+        //     }
+        // };
+        // console.log(list_selected_node);
+        // console.log(json.links[0].source);
+
+        // json_links = json.links.filter( // 제목에 해당하는 element 선택
+        //     function(e) {
+        //         return e.weight >= edge_min & e.weight <= edge_max & list_selected_node.includes(dict_idx2node[e.source]) & list_selected_node.includes(dict_idx2node[e.target]);
+        //         // return list_selected_node.includes(dict_idx2node[e.source]) & list_selected_node.includes(dict_idx2node[e.target]);
+        //         // return (e.weight >= edge_min & e.weight <= edge_max);
+        //     }
+        // );
+        // console.log(json_links);
+        // console.log(json);
+
         // 노드와 엣지에 힘 설정
         // force
         //     .nodes(json.nodes)
@@ -306,7 +423,7 @@ function renderSVG() {
         var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
             .data(json.links)
             .enter().append("line") // 선을 추가함
-            // .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
+            .filter(function(d){return d.weight >= edge_min & d.weight <= edge_max}) // edge 필터링: weight가 edge_min, edge_max 사이인 경우만
             .attr("class", "link")
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
@@ -322,6 +439,7 @@ function renderSVG() {
         var node = svg.selectAll(".node")
             .data(json.nodes)
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
+            .filter(function(d){return d.count >= node_min & d.count <= node_max}) // node 필터링: counte가 node_min, node_max 사이인 경우만
             .attr("class", "node") // 클래스는 node로 지정
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
@@ -441,6 +559,10 @@ function update() {
     changeEdgeColor(); // 엣지 색깔도 바꿔주고
     updateAccordion(); // 오른쪽 제목-내용 업데이트해준 다음에
     searchAccordion(); // 혹시나 검색어가 있으면 검색어를 포함하는 항목만 남기기
+}
+
+function update_SVG(node_min, node_max, edge_min, edge_max) {
+    ;
 }
 
 // 리셋 버튼 누르면 버튼 선택이 해제되게 하는 함수

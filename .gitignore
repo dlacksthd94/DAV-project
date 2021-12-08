@@ -3,6 +3,8 @@ demo.html
 
 # folder
 /stanford-corenlp-4.3.2
+/test
+/range_slider
 
 # code
 extract_animal_name.py
