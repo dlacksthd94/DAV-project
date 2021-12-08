@@ -1,8 +1,10 @@
 // 그래프 노드, 엣지 정보 json 파일 url
-const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
+const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_nips21.json"
+// const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_animals.json";
+
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
-// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/nuerips21.csv";
+// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/jaeyong/data/word_info_episode.csv";
 
 // moveToFront 함수는 선택한 요소를 화면 맨 위로 올려주는 함수임 (바로 아래에서 쓰임)
 d3.selection.prototype.moveToFront = function() {
@@ -76,7 +78,7 @@ function changeNodeColor() {
     var linked = []
     edges = document.querySelectorAll(".link")
     edges.forEach(function(edge){
-        var names = edge.id.split("-")
+        var names = edge.id.split("_")
         if (selected.some(name => names.includes(name))){
             names.forEach(function(name){
                 if(!selected.includes(name) && !linked.includes(name)){
@@ -88,31 +90,34 @@ function changeNodeColor() {
 
     // 모든 단어에 대하여 (각 단어를 value라고 했을 때)
     all.forEach(function (name) { 
-        var group = document.getElementById(name) // id=value인 node를 선택
-
+        var group = document.querySelector("g#"+name) // id=value인 node를 선택
+        console.log(group)
         // 하나의 노드는 원 하나, 배경 사각형 하나, 이름 텍스트 하나로 구성됨
-        circle = group.childNodes[0] // 원
-        rect = group.childNodes[1] // 배경 사각형
-        text = group.childNodes[2] // 이름 텍스트
-
+        // circle = group.childNodes[0] // 원
+        // rect = group.childNodes[1] // 배경 사각형
+        // text = group.childNodes[2] // 이름 텍스트
+        rect = group.childNodes[0] // 배경 사각형
+        text = group.childNodes[1] // 이름 텍스트
+        console.log(rect)
+        console.log(text)
         if (selected.includes(name)){
-            circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
+            // circle.setAttribute("fill", "#0066FF") // 원을 흰색으로
             // circle.setAttribute("r", 15)
-            circle.style.stroke='white' // 원 테두리를 파란색
+            // circle.style.stroke='white' // 원 테두리를 파란색
             rect.style.stroke='none' // 사각형 테두리는 없음
             rect.style.fill = "#0066FF" // 배경 사각형을 파란색으로
             text.style.fill = "white" // 글자는 흰색으로
         }else if(linked.includes(name)){
-            circle.setAttribute("fill", "white") // 원을 파란색으로
-            circle.style.stroke='#0066FF' // 원 테두리를 없애고
+            // circle.setAttribute("fill", "white") // 원을 파란색으로
+            // circle.style.stroke='#0066FF' // 원 테두리를 없애고
             rect.style.stroke='none' // 사각형 테두리를 파란색으로
-            rect.style.fill = "white" // 배경 사각형을 흰색으로
+            rect.style.fill = "none" // 배경 사각형을 흰색으로
             text.style.fill='#0066FF' // 글자는 파란색으로
         }else{
-            circle.setAttribute("fill", "grey") // 원을 흰색으로
-            circle.style.stroke='white' // 원 테두리를 흰색으로
+            // circle.setAttribute("fill", "grey") // 원을 흰색으로
+            // circle.style.stroke='white' // 원 테두리를 흰색으로
             rect.style.stroke='none' // 사각형 테두리는 없음
-            rect.style.fill='white' // 배경은 흰색으로
+            rect.style.fill='none' // 배경은 흰색으로
             text.style.fill='black' // 글자는 검은색으로
         }
     })
@@ -127,9 +132,10 @@ function changeEdgeColor(){
     edges = document.querySelectorAll(".link") // 모든 edge 읽어오기(class=link)
     edges.forEach(function(edge){ // 각각의 edge에 대해서
         // 각 edge의 id는 "source-target" 형식으로 만들어짐 (아래쪽 코드 참고)
-        var names = edge.id.split("-") 
+        var names = edge.id.split("_") 
         // 만약 source, target 중 하나라도 왼쪽 사이드바에서 선택되었으면
         if(selected.some(name => names.includes(name))){ 
+            console.log(names)
             edge.setAttribute("stroke", "#0066FF") // edge 색깔을 파란색으로 만들기
             edge.classList.add("highlighted")
         }else{
@@ -150,7 +156,7 @@ function updateAccordion() {
     var all = allBtns(); // 모든 단어 목록 만들기
     var selected = selectedBtns(); // 선택된 단어 목록 만들기
     d3.csv(csv_url, function (csv){ // word_info.csv 읽어와서
-        titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
+        var titles = [...new Set(csv.map(d => d.title))]; // 제목 배열 만들고
         // episodes = [...new Set(csv.map(d => d.episode))]; // 내용 배열 만들고
         words = []
         titles.forEach(function(t){
@@ -283,22 +289,23 @@ function renderSVG() {
         var link = svg.selectAll(".link") // 각 edge의 class는 link로 지정
             .data(json.links)
             .enter().append("line") // 선을 추가함
-            // .filter(function(d){return d.weight > 20}) // edge 필터링: weight가 20 이상인 edge만
+            // .filter(function(d){return d.weight > 10}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "link")
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
             .attr('title', function (d){return d.source.name + "-" + d.target.name + " | weight: " + d.weight})
             .attr("id", function (d) { return d.name }) // element의 id를 노드 이름으로 지정
-            .style("stroke-width", function (d) { return d.weight * 2.5}) // edge 굵기 지정
+            .style("stroke-width", function (d) { return d.weight/10}) // edge 굵기 지정
             .attr('stroke', '#C0C0C0') // edge 색상 지정
             .attr('id', function(d){
-                return d.source.name+"-"+d.target.name // edge id 지정: source-target 형식으로
+                return d.source.name+"_"+d.target.name // edge id 지정: source-target 형식으로
             });
     
         // 노드 그리기
         var node = svg.selectAll(".node")
             .data(json.nodes)
             .enter().append("g") // 그룹 추가(원+배경사각형+이름텍스트)
+            // .filter(function(d){return d.count > 50}) // edge 필터링: weight가 20 이상인 edge만
             .attr("class", "node") // 클래스는 node로 지정
             .attr('data-toggle', "tooltip")
             .attr('data-placement',"right")
@@ -307,26 +314,26 @@ function renderSVG() {
             // .call(d3.drag().on("drag", dragged))
             
         // 노드에 원 추가
-        node.append("circle")
-            // .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
-            // .style('stroke-width', 4)
-            // .style('stroke', 'white')
-            // .attr('fill', 'grey')
-            .attr('r', 0)
+        // node.append("circle")
+        //     // .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
+        //     // .style('stroke-width', 4)
+        //     // .style('stroke', 'white')
+        //     // .attr('fill', 'grey')
+        //     .attr('r', 0)
 
         // 노드에 텍스트 추가
         node.append("text")
             // .attr("x", 0)
             // .attr("dy", (d => -4-3*Math.sqrt(d.count)))
             .attr("text-anchor", "middle")
-            .attr("font-size", d => 10*Math.sqrt(d.count))
+            .attr("font-size", d => Math.sqrt(d.count))
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
-            .style("fill",function(d) {
-                colors = ['none', 'red', 'green', 'blue']
-                return colors[d.group]
-                // return "hsl(" + Math.random() * 360 + ",100%,50%)";
-                })
+            // .style("fill",function(d) {
+            //     colors = ['none', 'red', 'green', 'blue']
+            //     return colors[d.group]
+            //     // return "hsl(" + Math.random() * 360 + ",100%,50%)";
+            //     })
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
         function getBBox(selection){
@@ -338,7 +345,7 @@ function renderSVG() {
         // 배경 사각형 만들기
         node.insert('rect', 'text') // node의 text에다가 사각형을 추가해줌
         // 위치, 크기, 클래스, 색상 지정
-            .attr('fill', 'white')
+            .attr('fill', 'none')
             .attr('x', d => d.bbox.x)
             .attr('y', d => d.bbox.y)
             .attr('width', d => d.bbox.width)
