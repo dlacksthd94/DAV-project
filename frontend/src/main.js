@@ -331,18 +331,25 @@ function renderSVG() {
             
         // 노드에 원 추가
         node.append("circle")
-            .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
-            .style('stroke-width', 4)
-            .style('stroke', 'white')
-            .attr('fill', 'grey')
+            // .attr("r", (d => 3*Math.sqrt(d.count))) // 노드 원 반지름 설정
+            // .style('stroke-width', 4)
+            // .style('stroke', 'white')
+            // .attr('fill', 'grey')
+            .attr('r', 0)
 
         // 노드에 텍스트 추가
         node.append("text")
             // .attr("x", 0)
-            .attr("dy", (d => -4-3*Math.sqrt(d.count)))
+            // .attr("dy", (d => -4-3*Math.sqrt(d.count)))
             .attr("text-anchor", "middle")
+            .attr("font-size", d => 10*Math.sqrt(d.count))
             .text(function (d) { return d.name }) // 텍스트 내용을 노드 이름으로 지정
             .call(getBBox) // getBBox 함수 실행해서 글자를 둘러싼 사각형 가져오기(배경색 칠하려고) 
+            .style("fill",function(d) {
+                colors = ['none', 'red', 'green', 'blue']
+                return colors[d.group]
+                // return "hsl(" + Math.random() * 360 + ",100%,50%)";
+                })
         
         // 노드 그룹 데이터를 입력받아서, 각 항목에 bbox라는 이름으로 텍스트의 bounding box의 위치와 크기를 저장
         function getBBox(selection){
