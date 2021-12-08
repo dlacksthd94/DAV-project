@@ -1,22 +1,16 @@
 // 그래프 노드, 엣지 정보 json 파일 url
-const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
+const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/graph_animals.json";
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
 // const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/Aesop.csv";
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/word_info_episode.csv";
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/word_info_episode.csv";
 // 제목으로 그림 찾을 수 있는 json 파일 url
-const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/picture.json'
-// const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jaeyong/backend/data/graph_animals.json";
+const json_picture_url = 'https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/picture.json'
+// const json_picture_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/jy-slider/backend/data/graph_animals.json";
 
 var img_url_json = 'before assign'
 $.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
     img_url_json = json
 })
-
-var img_url_json = 'before assign'
-$.getJSON(json_picture_url, function (json){ // 그림 json 파일을 json으로 불러와서
-    img_url_json = json
-})
-
 
 // 노드 필터링 슬라이더
 $('#anchor1').rangeSlider(
@@ -367,72 +361,7 @@ function renderSVG() {
 
     // 그래프 그리는 부분
     d3.json(json_url, function (json) {
-        // var json = {};
-
-        // // 노드의 idx와 name으로 딕셔너리 만들기
-        // var dict_idx2node = {};
-        // for (var i = 0; i < json_original.nodes.length; i++) {
-        //     var element = json_original.nodes[i];
-        //     var name = element.name;
-        //     dict_idx2node[name] = i;
-        // };
-        // console.log(dict_idx2node);
-
-        // // 노드 min, max 범위 내 노드 선택
-        // json.nodes = json_original.nodes.filter(
-        //     function(e) {
-        //         return (e.count >= node_min) && (e.count <= node_max);
-        //     }
-        // );
-        // console.log(json_original.nodes);
-        // console.log(json.nodes);
-
-        // var dict_oldIdx2newIdx = {};
-        // for (var i = 0; i < json.nodes.length; i++) {
-        //     var element = json.nodes[i];
-        //     var name = element.name;
-        //     oldIdx = dict_idx2node[name];
-        //     dict_oldIdx2newIdx[oldIdx] = i;
-        // };
-        // console.log(dict_oldIdx2newIdx);
-
-        // for (var i = 0; i < json_original.links.length; i++) {
-        //     link = json_original.links[i]
-        //     if ((link.source < json.nodes.length) && (link.target < json.nodes.length)) {
-        //         link.source = dict_oldIdx2newIdx[link.source]
-        //         link.target = dict_oldIdx2newIdx[link.target]
-
-        //     }
-        // }
-
-        // var links = [];
-        // // 새로운 노드 idx에 맞게 edge의 source, target idx 수정
-        // for (var i = 0; i < json_original.links.length; i++) {
-        //     link = json_original.links[i];
-        // }
-
-        // // 선택된 노드 index 리스트
-        // var list_selected_node = []
-        // for (var i = 0; i < json_nodes.length; i++) {
-        //     row = json_nodes[i];
-        //     var name = row.index
-        //     if (!list_selected_node.includes(name)) {
-        //         list_selected_node.push(name);
-        //     }
-        // };
-        // console.log(list_selected_node);
-        // console.log(json.links[0].source);
-
-        // json_links = json.links.filter( // 제목에 해당하는 element 선택
-        //     function(e) {
-        //         return e.weight >= edge_min & e.weight <= edge_max & list_selected_node.includes(dict_idx2node[e.source]) & list_selected_node.includes(dict_idx2node[e.target]);
-        //         // return list_selected_node.includes(dict_idx2node[e.source]) & list_selected_node.includes(dict_idx2node[e.target]);
-        //         // return (e.weight >= edge_min & e.weight <= edge_max);
-        //     }
-        // );
-        // console.log(json_links);
-        // console.log(json);
-
+        
         // 노드와 엣지에 힘 설정
         // force
         //     .nodes(json.nodes)
