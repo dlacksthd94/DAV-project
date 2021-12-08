@@ -31,11 +31,11 @@ var svg = d3.select("body").append("svg")
 
 var force = d3.layout.force()
     .gravity(.05)
-    .distance(500)
+    .distance(1000)
     .charge(-100)
     .size([width, height]);
 console.log(force);
-d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/lim/backend/data/graph_sent.json", function(json) {
+d3.json("https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_epi.json", function(json) {
   console.log(json);
   
   force
