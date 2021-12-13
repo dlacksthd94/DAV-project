@@ -1,3 +1,5 @@
+header('Content-Type: text/javascript');
+
 // 그래프 노드, 엣지 정보 json 파일 url
 const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_nips.json"
 // const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_animals.json";
