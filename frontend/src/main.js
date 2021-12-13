@@ -1,10 +1,10 @@
 // 그래프 노드, 엣지 정보 json 파일 url
-const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_nips.json"
+const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/graph_nips.json"
 // const json_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/graph_animals.json";
 
 // 스토리 제목과 원문 검색할 수 있는 csv 파일 url 
-// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/neurips21.csv";
-const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/word_info_epi_nips.csv";
+// const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/back/backend/data/neurips21.csv"; 
+const csv_url = "https://raw.githubusercontent.com/dlacksthd94/DAV-project/main/backend/data/word_info_epi_nips.csv";
 
 
 // 노드 필터링 슬라이더
